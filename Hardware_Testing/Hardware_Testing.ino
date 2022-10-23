@@ -16,7 +16,7 @@
 #define SDAPIN PB9
 #define SCLPIN PB8
 
-BLDCMotor motor = BLDCMotor(14);
+BLDCMotor motor = BLDCMotor(7, 5.6);
 BLDCDriver3PWM driver = BLDCDriver3PWM(PA0, PA1, PA2, PC14);
 
 MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
@@ -62,7 +62,7 @@ void setup() {
   motor.linkDriver(&driver);
   
   motor.voltage_limit = 6.0;   // [V] - if phase resistance not defined
-  motor.velocity_limit = 5; // [rad/s] cca 50rpm
+  motor.velocity_limit = 7; // [rad/s] cca 50rpm
 
   motor.controller = MotionControlType::velocity_openloop;
   motor.init();
@@ -71,6 +71,8 @@ void setup() {
   
   Serial.println("Motor ready!");
   Serial.println("Set target velocity [rad/s]");
+
+  motor.target = 6.0;
   // user communication
 }
 
@@ -83,5 +85,4 @@ void loop() {
   Serial.print("\t");
   Serial.println(sensor.getVelocity());
   motor.move();
-  command.run();
 }
