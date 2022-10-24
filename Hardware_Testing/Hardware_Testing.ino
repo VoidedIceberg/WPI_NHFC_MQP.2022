@@ -40,11 +40,6 @@ void initI2C() {
   Wire.begin(SLAVEADDRESS);
 }
 
-// instantiate the commander
-Commander command = Commander(Serial);
-void doTarget(char* cmd) { command.scalar(&motor.target, cmd); }
-
-
 void setup() {
   blink(5,200);
   // monitoring port
@@ -72,7 +67,7 @@ void setup() {
   Serial.println("Motor ready!");
   Serial.println("Set target velocity [rad/s]");
 
-  motor.target = 5.0;
+  motor.target = 0.1;
   // user communication
 }
 
