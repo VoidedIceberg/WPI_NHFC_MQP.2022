@@ -9,7 +9,7 @@
 #define SDAPIN PB9
 #define SCLPIN PB8
 
-BLDCMotor motor = BLDCMotor(14, 5.6);
+BLDCMotor motor = BLDCMotor(7, 5.6);
 BLDCDriver3PWM driver = BLDCDriver3PWM(PA0, PA1, PA2, PC14);
 
 MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
@@ -29,7 +29,7 @@ void setup() {
   driver.voltage_power_supply = 8.4;
   driver.init();
   motor.linkDriver(&driver);
-  motor.voltage_sensor_align = 5;
+  motor.voltage_sensor_align = 5.0;
 
   motor.torque_controller = TorqueControlType::voltage;
   motor.controller = MotionControlType::torque;
@@ -37,7 +37,7 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = 1.5; // Volts   
+  motor.target = 1.0; // Volts   
 
 }
 
@@ -45,7 +45,9 @@ void loop() {
   // put your main code here, to run repeatedly:
   // main FOC algorithm function
   motor.loopFOC();
-
+  Serial.print(sensor.getAngle());
+  Serial.print("\t");
+  Serial.println(sensor.getVelocity());
   // Motion control function
   motor.move();
 }
