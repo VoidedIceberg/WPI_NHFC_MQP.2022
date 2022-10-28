@@ -15,7 +15,7 @@ BLDCDriver3PWM driver = BLDCDriver3PWM(PA0, PA1, PA2, PC14);
 MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C); 
 
 // we want to change it continuously
-V = 1.0; // Volts
+float V = 1.0; // Volts
 
 void initI2C() {
   Wire.setSDA(SDAPIN);
