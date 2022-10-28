@@ -12,12 +12,19 @@
 BLDCMotor motor = BLDCMotor(7, 5.6);
 BLDCDriver3PWM driver = BLDCDriver3PWM(PA0, PA1, PA2, PC14);
 
-MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
+MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C); 
+
+// we want to change it continuously
+V = 1.0; // Volts
 
 void initI2C() {
   Wire.setSDA(SDAPIN);
   Wire.setSCL(SCLPIN);
   Wire.begin(SLAVEADDRESS);
+}
+
+void getVoltage(){
+  V = Serial.parseFloat();
 }
 
 void setup() {
@@ -37,11 +44,11 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = 1.0; // Volts 
-
+  motor.target = V;
 }
 
 void loop() {
+  getVoltage();
   // put your main code here, to run repeatedly:
   // main FOC algorithm function
   motor.loopFOC();
