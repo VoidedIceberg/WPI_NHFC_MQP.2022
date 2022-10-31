@@ -44,7 +44,7 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = V;
+  motor.target = getVoltage();
 }
 
 void loop() {
