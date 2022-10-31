@@ -41,7 +41,6 @@ void initI2C() {
 }
 
 void setup() {
-  blink(5,200);
   // monitoring port
   Serial.begin(9600);
   
@@ -61,7 +60,8 @@ void setup() {
 
   motor.controller = MotionControlType::velocity_openloop;
   motor.init();
-  
+  blink(5,200);
+
   Serial.println("Motor ready!");
   Serial.println("Set target velocity [rad/s]");
 
