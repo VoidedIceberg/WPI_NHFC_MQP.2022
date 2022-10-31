@@ -23,8 +23,17 @@ void initI2C() {
   Wire.begin(SLAVEADDRESS);
 }
 
-void getVoltage(){
-  V = Serial.parseFloat();
+void parseInput(float input){
+  V = input;
+}
+
+void checkVoltage(){
+  if(V>8.4){
+    V = 8.4;
+  }
+  if(V<=0.0){
+    V = 0;
+  }
 }
 
 void setup() {
@@ -44,17 +53,23 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = getVoltage();
+  motor.target = V;
 }
 
 void loop() {
-  getVoltage();
+  checkVoltage();
+  float input = Serial.parseFloat();
+  if(input != 0.0 && input <= 8.4){
+      parseInput(input);
+  }
+  Serial.print("Voltage: ");
+  Serial.println(V);
   // put your main code here, to run repeatedly:
   // main FOC algorithm function
   motor.loopFOC();
-  Serial.print(sensor.getAngle());
-  Serial.print("\t");
-  Serial.println(sensor.getVelocity());
+  // Serial.print(sensor.getAngle());
+  // Serial.print("\t");
+  // Serial.println(sensor.getVelocity());
   // Motion control function
   motor.move();
 }
