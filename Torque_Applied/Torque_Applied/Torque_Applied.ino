@@ -25,14 +25,16 @@ void initI2C() {
 
 void parseInput(float input){
   V = input;
+  checkVoltage(V);
+  motor.target = V;
 }
 
-void checkVoltage(){
-  if(V>8.4){
-    V = 8.4;
+void checkVoltage(int v){
+  if(v >= 8.4){
+    v = 8.4;
   }
-  if(V<=0.0){
-    V = 0;
+  if(v <= -8.4){
+    v = -8.4;
   }
 }
 
@@ -57,10 +59,11 @@ void setup() {
 }
 
 void loop() {
-  checkVoltage();
-  float input = Serial.parseFloat();
-  if(input != 0.0 && input <= 8.4){
-      parseInput(input);
+  if(Serial.available()){
+    float input = Serial.parseFloat();
+    if(input != 0.0){
+        parseInput(input);
+    }
   }
   Serial.print("Voltage: ");
   Serial.println(V);
