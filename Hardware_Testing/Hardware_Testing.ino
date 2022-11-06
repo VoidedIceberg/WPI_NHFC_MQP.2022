@@ -1,7 +1,6 @@
 #include <Wire.h>
 #include <SimpleFOC.h>
 
-
 /*
    Rotary Encoder Wires:
    Purple - PWM -  Gray

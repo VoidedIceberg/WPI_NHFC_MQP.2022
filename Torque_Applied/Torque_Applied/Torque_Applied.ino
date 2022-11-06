@@ -12,7 +12,10 @@
 BLDCMotor motor = BLDCMotor(7, 5.6);
 BLDCDriver3PWM driver = BLDCDriver3PWM(PA0, PA1, PA2, PC14);
 
-MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C);
+MagneticSensorI2C sensor = MagneticSensorI2C(AS5600_I2C); 
+
+// we want to change it continuously
+float V = 1.0; // Volts
 
 void initI2C() {
   Wire.setSDA(SDAPIN);
@@ -20,10 +23,23 @@ void initI2C() {
   Wire.begin(SLAVEADDRESS);
 }
 
+void parseInput(float input){
+  V = input;
+  checkVoltage(V);
+  motor.target = V;
+}
+
+void checkVoltage(int v){
+  if(v >= 8.4){
+    v = 8.4;
+  }
+  if(v <= -8.4){
+    v = -8.4;
+  }
+}
+
 void setup() {
   Serial.begin(9600);
-  blink(1, 200);
-
   initI2C();
   sensor.init();
   motor.linkSensor(&sensor);
@@ -39,30 +55,24 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = 1.0; // Volts 
-
+  motor.target = V;
 }
 
 void loop() {
+  if(Serial.available()){
+    float input = Serial.parseFloat();
+    if(input != 0.0){
+        parseInput(input);
+    }
+  }
+  Serial.print("Voltage: ");
+  Serial.println(V);
   // put your main code here, to run repeatedly:
   // main FOC algorithm function
   motor.loopFOC();
-  Serial.print(sensor.getAngle());
-  Serial.print("\t");
-  Serial.println(sensor.getVelocity());
+  // Serial.print(sensor.getAngle());
+  // Serial.print("\t");
+  // Serial.println(sensor.getVelocity());
   // Motion control function
   motor.move();
-}
-
-void blink(int amount, int del)
-{
-  pinMode(LEDPIN, OUTPUT);
-
-  for (int i = 0; i < amount; i++)
-  {
-    digitalWrite(LEDPIN, HIGH);
-    delay(del);
-    digitalWrite(LEDPIN, LOW);
-    delay(del);
-  }
 }
