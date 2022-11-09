@@ -25,17 +25,18 @@ void initI2C() {
 
 void parseInput(float input){
   V = input;
-  checkVoltage(V);
+  V = checkVoltage(V);
   motor.target = V;
 }
 
-void checkVoltage(int v){
+float checkVoltage(int v){
   if(v >= 8.4){
     v = 8.4;
   }
   if(v <= -8.4){
     v = -8.4;
   }
+  return v;
 }
 
 void setup() {
