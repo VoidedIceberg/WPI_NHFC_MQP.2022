@@ -33,42 +33,46 @@ void blink(int amount, int del)
   }
 }
 
-void initI2C() {
+void initI2C()
+{
   Wire.setSDA(SDAPIN);
   Wire.setSCL(SCLPIN);
   Wire.begin(SLAVEADDRESS);
 }
 
-void setup() {
-  // monitoring port
-  Serial.begin(9600);
-  
-  initI2C();
-  // initialise encoder hardware
-  sensor.init();
+void setup()
+{
+   // monitoring port
+   Serial.begin(9600);
+
+   initI2C();
+   // initialise encoder hardware
+   sensor.init();
 
    // driver config
-  // power supply voltage [V]
-  driver.voltage_power_supply = 8.4;
-  driver.init();
-  // link the motor and the driver
-  motor.linkDriver(&driver);
-  
-  motor.voltage_limit = 4;   // [V] - if phase resistance not defined
-  motor.velocity_limit = 7; // [rad/s] cca 50rpm
+   // power supply voltage [V]
+   driver.voltage_power_supply = 8.4;
+   driver.init();
+   // link the motor and the driver
+   motor.linkDriver(&driver);
 
-  motor.controller = MotionControlType::velocity_openloop;
-  motor.init();
-  blink(5,200);
+   motor.voltage_limit = 4;  // [V] - if phase resistance not defined
+   motor.velocity_limit = 7; // [rad/s] cca 50rpm
 
-  Serial.println("Motor ready!");
-  Serial.println("Set target velocity [rad/s]");
+   motor.controller = MotionControlType::velocity_openloop;
+   motor.init();
+   blink(5, 200);
 
-  motor.target = 6.0;
-  // user communication
+   Serial.println("Motor ready!");
+   Serial.println("Set target velocity [rad/s]");
+
+   motor.target = 6.0;
+   //user communication
 }
 
-void loop() {
+void loop()
+{
+  blink(1, 0);
   // IMPORTANT
   // read sensor and update the internal variables
   sensor.update();

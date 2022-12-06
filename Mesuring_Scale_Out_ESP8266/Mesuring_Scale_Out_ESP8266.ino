@@ -11,63 +11,58 @@
 
 #include <Arduino.h>
 #include "HX711.h"
+#include <Wire.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial Serial2(D7, D8); // RX, TX
 
 // HX711 circuit wiring
-const int LOADCELL_DOUT_PIN = 12;
-const int LOADCELL_SCK_PIN = 13;
+const int LOADCELL_DOUT_PIN = D2;
+const int LOADCELL_SCK_PIN = D3;
 
 HX711 scale;
 
+
+typedef union {
+  float fp;
+  byte bin[4];
+} bF;
+
+bF requested_V;
+
 void setup() {
   Serial.begin(115200);
-  Serial.println("HX711 Demo");
+  Serial2.begin(9600);
+  requested_V.fp = 0.0f;
+  
+  Wire.begin();  
   Serial.println("Initializing the scale");
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
 
-  Serial.println("Before setting up the scale:");
-  Serial.print("read: \t\t");
-  Serial.println(scale.read());      // print a raw reading from the ADC
-
-  Serial.print("read average: \t\t");
-  Serial.println(scale.read_average(20));   // print the average of 20 readings from the ADC
-
-  Serial.print("get value: \t\t");
-  Serial.println(scale.get_value(5));   // print the average of 5 readings from the ADC minus the tare weight (not set yet)
-
-  Serial.print("get units: \t\t");
-  Serial.println(scale.get_units(5), 1);  // print the average of 5 readings from the ADC minus tare weight (not set) divided
-            // by the SCALE parameter (not set yet)
-            
-  scale.set_scale(-478.507);
-  //scale.set_scale(-471.497);                      // this value is obtained by calibrating the scale with known weights; see the README for details
+  scale.set_scale(11936 / 12); // 11936 / 12
   scale.tare();               // reset the scale to 0
-
-  Serial.println("After setting up the scale:");
-
-  Serial.print("read: \t\t");
-  Serial.println(scale.read());                 // print a raw reading from the ADC
-
-  Serial.print("read average: \t\t");
-  Serial.println(scale.read_average(20));       // print the average of 20 readings from the ADC
-
-  Serial.print("get value: \t\t");
-  Serial.println(scale.get_value(5));   // print the average of 5 readings from the ADC minus the tare weight, set with tare()
-
-  Serial.print("get units: \t\t");
-  Serial.println(scale.get_units(5), 1);        // print the average of 5 readings from the ADC minus tare weight, divided
-            // by the SCALE parameter set with set_scale
 
   Serial.println("Readings:");
 }
 
-void loop() {
-  Serial.print("one reading:\t");
-  Serial.print(scale.get_units(), 1);
-  Serial.print("\t| average:\t");
-  Serial.println(scale.get_units(10), 5);
+void readScale()
+{
+   Serial.print(requested_V.fp);
+   Serial.print("\t");
+   Serial.println(scale.get_units());
+}
 
-  scale.power_down();             // put the ADC in sleep mode
-  delay(5000);
-  scale.power_up();
+float last = 0;
+
+void loop() {
+  if (millis()-last > 10000) // This makes it happen every 10 sec.
+  {
+    requested_V.fp = requested_V.fp + 0.01;
+    Serial2.write(requested_V.bin,4);
+
+    last = millis();
+  }
+  readScale();
+
 }
