@@ -1,20 +1,20 @@
 #include <Arduino.h>
 #include <SimpleFOC.h>
+#include "message_handler.h"
 
 enum STATE
 {
-  INIT,    // When the controller is first powered on
   IDLE,    // When waiting for the PC host to connect
   READING, // Checks for new messages from the PC host
   ACTING,  // Commands the forces acting on linear and rotational axis
-  SENDING, // Sends the change in position to the PC host
+  SENDING // Sends the change in position to the PC host
 };
 
 void initI2C(void);
 void blink(int amount, int del);
 void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder);
 
-enum STATE state = INIT;
+enum STATE state = IDLE;
 
 #define LEDPIN PA7
 
@@ -75,8 +75,6 @@ void loop()
 {
   switch (state)
   {
-    case INIT:
-      break;
     case IDLE:
       break;
     case READING:
@@ -88,7 +86,7 @@ void loop()
     default:
       break;
   }
-  
+
   // Makes sure the motors run on every loop
   LIN_MOTOR.loopFOC();
   ROT_MOTOR.loopFOC();
