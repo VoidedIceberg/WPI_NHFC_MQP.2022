@@ -1,25 +1,8 @@
 #include <Arduino.h>
 #include <SimpleFOC.h>
+#include "main.h"
 #include "message_handler.h"
-
-enum STATE
-{
-  IDLE,    // When waiting for the PC host to connect
-  READING, // Checks for new messages from the PC host
-  ACTING,  // Commands the forces acting on linear and rotational axis
-  SENDING // Sends the change in position to the PC host
-};
-
-void initI2C(void);
-void blink(int amount, int del);
-void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder);
-
-enum STATE state = IDLE;
-
-#define LEDPIN PA7
-
-#define MOTOR_POLES 7
-#define MOTOR_RESISTANCE 5.6
+#include "utils.h"
 
 BLDCMotor ROT_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
 BLDCDriver3PWM ROT_DRIVER = BLDCDriver3PWM(PC0, PC1, PC2, PC13); // M1 Port
@@ -29,22 +12,43 @@ BLDCMotor LIN_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
 BLDCDriver3PWM LIN_DRIVER = BLDCDriver3PWM(PA0, PA1, PA2, PC14); // M2 Port
 MagneticSensorI2C LIN_ENCODER = MagneticSensorI2C(AS5600_I2C);
 
-#define I2C_SDA_PIN PB9
-#define I2C_SCL_PIN PB8
-#define SLAVEADDRESS 0x8
-
-#define FEED_BUTTON_PIN ;
+enum STATE state = IDLE;
 
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+
+  Serial.begin(9600); // initialize serial communication on the CDC USB port
   initI2C();
   initMotor(ROT_MOTOR, ROT_DRIVER, ROT_ENCODER);
   initMotor(LIN_MOTOR, LIN_DRIVER, LIN_ENCODER);
 
   LIN_MOTOR.target = 0;
   ROT_MOTOR.target = 0;
+}
+
+void loop()
+{
+  switch (state)
+  {
+  case IDLE:
+    break;
+  case READING:
+    break;
+  case ACTING:
+    break;
+  case SENDING:
+    break;
+  default:
+    break;
+  }
+
+  // Makes sure the motors run on every loop
+  LIN_MOTOR.loopFOC();
+  ROT_MOTOR.loopFOC();
+
+  LIN_MOTOR.move();
+  ROT_MOTOR.move();
 }
 
 void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder)
@@ -69,41 +73,4 @@ void initI2C()
   Wire.setSDA(I2C_SDA_PIN);
   Wire.setSCL(I2C_SCL_PIN);
   Wire.begin(SLAVEADDRESS);
-}
-
-void loop()
-{
-  switch (state)
-  {
-    case IDLE:
-      break;
-    case READING:
-      break;
-    case ACTING:
-      break;
-    case SENDING:
-      break;
-    default:
-      break;
-  }
-
-  // Makes sure the motors run on every loop
-  LIN_MOTOR.loopFOC();
-  ROT_MOTOR.loopFOC();
-
-  LIN_MOTOR.move();
-  ROT_MOTOR.move();
-}
-
-void blink(int amount, int del)
-{
-  pinMode(LEDPIN, OUTPUT);
-
-  for (int i = 0; i < amount; i++)
-  {
-    digitalWrite(LEDPIN, HIGH);
-    delay(del);
-    digitalWrite(LEDPIN, LOW);
-    delay(del);
-  }
 }
