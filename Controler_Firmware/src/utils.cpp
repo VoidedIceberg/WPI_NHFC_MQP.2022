@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "main.h"
-#include "utils.h"
+#include <main.h>
+#include <utils.h>
 
 void blink(int amount, int del)
 {

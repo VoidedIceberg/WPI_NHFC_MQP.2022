@@ -1,4 +1,4 @@
-#include "message_handler.h"
+#include <message_handler.h>
 #include <SimpleFOC.h>
 
 void function()
@@ -15,9 +15,9 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 {
     // Send the movement to the PC host
     Serial.print("M ");
-    Serial.print(ROT_ENCODER.getPreciseAngle());
+    Serial.print(ROT_ENCODER.getAngle());
     Serial.print(" ");
-    Serial.println(angleToLinear(LIN_ENCODER.getPreciseAngle()));
+    Serial.println(angleToLinear(LIN_ENCODER.getAngle()));
 }
 
 // Function to convert the angle to a linear measurement

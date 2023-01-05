@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <SimpleFOC.h>
-#include "main.h"
-#include "message_handler.h"
-#include "utils.h"
+#include <main.h>
+#include <message_handler.h>
+#include <utils.h>
 
 BLDCMotor ROT_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
 BLDCDriver3PWM ROT_DRIVER = BLDCDriver3PWM(PC0, PC1, PC2, PC13); // M1 Port
@@ -32,14 +32,21 @@ void loop()
   switch (state)
   {
   case IDLE:
+    state = READING;
     break;
   case READING:
-    break;
-  case ACTING:
+    if (Serial.available() > 0)
+    {
+      handelMessage(Serial, ROT_MOTOR, LIN_MOTOR);
+    }
+    state = SENDING;
     break;
   case SENDING:
+    sendMovement(ROT_ENCODER, LIN_ENCODER);
+    state = READING;
     break;
   default:
+    state = IDLE;
     break;
   }
 
@@ -49,15 +56,18 @@ void loop()
 
   LIN_MOTOR.move();
   ROT_MOTOR.move();
+  ROT_ENCODER.update();
+  LIN_ENCODER.update();
+  blink(1, 0);
 }
 
 void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder)
 {
   encoder.init();
   driver.init();
-  driver.voltage_power_supply = 8.4;
-  motor.voltage_limit = 1.4;
-  motor.velocity_limit = 3;
+  driver.voltage_power_supply = VCC;
+  motor.voltage_limit = VOLTAGE_LIMIT;
+  motor.velocity_limit = VELOCITY_LIMIT;
   motor.linkDriver(&driver);
   motor.linkSensor(&encoder);
   motor.torque_controller = TorqueControlType::voltage;
