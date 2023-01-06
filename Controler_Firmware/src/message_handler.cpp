@@ -10,14 +10,24 @@ void function()
     }
 }
 
+float lastROTAngle = 0.0;
+float lastLinAngle = 0.0;
+
 // Function to send the movement to the PC host
+// Only sends the distance traveled since the last send
 void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 {
+    float currentRotAngle = ROT_ENCODER.getAngle();
+    float currentLinAngle = LIN_ENCODER.getAngle();
+
     // Send the movement to the PC host
     Serial.print("M ");
-    Serial.print(ROT_ENCODER.getAngle());
+    Serial.print(currentRotAngle - lastROTAngle);
     Serial.print(" ");
-    Serial.println(angleToLinear(LIN_ENCODER.getAngle()));
+    Serial.println(angleToLinear(currentLinAngle - lastLinAngle));
+
+    lastROTAngle = currentRotAngle;
+    lastLinAngle = currentLinAngle;
 }
 
 // Function to convert the angle to a linear measurement
@@ -38,7 +48,7 @@ float forceToRotVoltage(float force)
 {
     return force;
 }
- 
+
 // Function handels incomming message on the serial port and sets the motors target accordingly
 void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
 {
