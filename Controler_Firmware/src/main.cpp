@@ -53,11 +53,6 @@ void loop()
   // Makes sure the motors run on every loop
   LIN_MOTOR.loopFOC();
   ROT_MOTOR.loopFOC();
-
-  LIN_MOTOR.move();
-  ROT_MOTOR.move();
-  ROT_ENCODER.update();
-  LIN_ENCODER.update();
   blink(1, 0);
 }
 
