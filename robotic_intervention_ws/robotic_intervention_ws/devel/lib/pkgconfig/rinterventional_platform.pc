@@ -1,0 +1,8 @@
+prefix=/home/rohit/robotic_intervention_ws/devel
+
+Name: rinterventional_platform
+Description: Description of rinterventional_platform
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

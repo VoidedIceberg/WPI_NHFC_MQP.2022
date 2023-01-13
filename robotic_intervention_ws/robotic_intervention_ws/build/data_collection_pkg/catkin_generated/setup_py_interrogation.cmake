@@ -1,0 +1,7 @@
+set(data_collection_pkg_SETUP_PY_SETUP_MODULE "setuptools")
+set(data_collection_pkg_SETUP_PY_VERSION "0.0.0")
+set(data_collection_pkg_SETUP_PY_SCRIPTS "")
+set(data_collection_pkg_SETUP_PY_PACKAGES "data_collection_pkg")
+set(data_collection_pkg_SETUP_PY_PACKAGE_DIRS "src/data_collection_pkg")
+set(data_collection_pkg_SETUP_PY_MODULES "")
+set(data_collection_pkg_SETUP_PY_MODULE_DIRS "")

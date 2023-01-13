@@ -1,0 +1,7 @@
+set(rinterventional_platform_SETUP_PY_SETUP_MODULE "setuptools")
+set(rinterventional_platform_SETUP_PY_VERSION "0.0.0")
+set(rinterventional_platform_SETUP_PY_SCRIPTS "")
+set(rinterventional_platform_SETUP_PY_PACKAGES "rinterventional_platform")
+set(rinterventional_platform_SETUP_PY_PACKAGE_DIRS "src/rinterventional_platform")
+set(rinterventional_platform_SETUP_PY_MODULES "")
+set(rinterventional_platform_SETUP_PY_MODULE_DIRS "")
