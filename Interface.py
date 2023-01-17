@@ -1,6 +1,5 @@
 import PySerial
 
-
 rotation = 0;
 distance = 0;
 
