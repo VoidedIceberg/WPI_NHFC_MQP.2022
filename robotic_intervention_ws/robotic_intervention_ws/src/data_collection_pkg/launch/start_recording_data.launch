@@ -1,0 +1,24 @@
+<launch>
+	<arg name="cam1_id" doc="First Camera Index" default="2"/>
+	<arg name="cam2_id" doc="First Camera Index" default="0"/>
+	<arg name="width"   doc="Frame Width" default="800" />
+	<arg name="height"  doc="Frame Height" default="600"/>
+
+	<include file="$(find polhemus_ros_driver)/launch/start.launch" />
+
+	<node name="camera_1" pkg="data_collection_pkg" type="record_camera.py" output="screen">
+		<param name="cam_id" value="$(arg cam1_id)" />
+		<param name="width"  value="$(arg width)"   />
+		<param name="height" value="$(arg height)"  />
+	</node>
+
+    <node name="camera_2" pkg="data_collection_pkg" type="record_camera.py" output="screen">
+		<param name="cam_id" value="$(arg cam2_id)" />
+		<param name="width"   value="$(arg width)"   />
+		<param name="height"  value="$(arg height)"  />
+	</node>
+
+	<node name="torque_pose" pkg="data_collection_pkg" type="record_emt_pose.py" output="screen"/>
+
+
+</launch>

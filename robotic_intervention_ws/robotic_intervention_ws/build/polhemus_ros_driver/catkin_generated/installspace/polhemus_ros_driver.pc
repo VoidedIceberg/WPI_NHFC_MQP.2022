@@ -1,0 +1,8 @@
+prefix=/home/rohit/robotic_intervention_ws/install
+
+Name: polhemus_ros_driver
+Description: Description of polhemus_ros_driver
+Version: 0.0.1
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lpolhemus
+Requires: std_msgs geometry_msgs tf2 tf2_ros roscpp message_runtime
