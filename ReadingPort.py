@@ -12,7 +12,7 @@ for onePort in ports:
 port = input("Select Port: COM")
 defaultPort = 3
 
-for x in range(0,len(portsList)):
+for x in range(0, len(portsList)):
     if portsList[x].startswith("COM" + str(port)):
         portVar = "COM" + str(defaultPort)
         print(portVar)
@@ -22,6 +22,6 @@ serialInst.port = portVar
 serialInst.open()
 
 while True:
-	if serialInst.in_waiting:
-		packet = serialInst.readline()
-		print(packet.decode('utf').rstrip('\n'))
+    if serialInst.in_waiting:
+        packet = serialInst.readline()
+        print(packet.decode('utf').rstrip('\n'))
