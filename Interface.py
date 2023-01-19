@@ -1,4 +1,4 @@
-import PySerial
+import serial
 
 
 rotation = 0;
