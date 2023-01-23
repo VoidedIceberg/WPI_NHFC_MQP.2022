@@ -5,12 +5,14 @@ import os, fcntl, termios, sys
 currRot = None # current rotation
 currD = None # current distance
 
+# display the ports on the current device
 ports = serial.tools.list_ports.comports()
 portsList = []
 for onePort in ports:
     portsList.append(str(onePort))
     print(str(onePort))
 
+# type the number of the port ex. 1 as the first 2 as the second
 port = input("Select Port: ")
 defaultPort = 3
 port = portsList[int(port)-1].split(" ")[0]
@@ -42,6 +44,7 @@ def isDataAvailable(rot, d): # check if the data is continous
         return 0
     return 1
 
+# continuously grabbing the data
 while True:
     try:
         if serialHandler.in_waiting:
