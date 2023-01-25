@@ -46,8 +46,8 @@ void setup()
   nh.advertise(linearPub);
   nh.advertise(rotPub);
 
-  LIN_MOTOR.target = 10;
-  ROT_MOTOR.target = 10;
+  LIN_MOTOR.target = 0;
+  ROT_MOTOR.target = 0;
 }
 
 // reading directly from motor

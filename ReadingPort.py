@@ -50,7 +50,7 @@ def isDataAvailable(rot, d): # check if the data is continous
 # continuously grabbing the data
 index = 0
 while True:
-    index+=1
+    index += 1
     try:
         if serialHandler.in_waiting:
             packet = serialHandler.readline()
