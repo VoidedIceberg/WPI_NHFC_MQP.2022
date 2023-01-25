@@ -3,6 +3,7 @@
 #include <main.h>
 #include <message_handler.h>
 #include <utils.h>
+#include <hardwareTesting.h>
 
 //include ROS package
 #include <ros.h>
@@ -83,9 +84,10 @@ void loop()
     state = SENDING;
     break;
   case SENDING:
-    sendMovement(ROT_ENCODER, LIN_ENCODER);
+    // sendMovement(ROT_ENCODER, LIN_ENCODER);
     state = READING;
     break;
+    
   default:
     state = IDLE;
     break;

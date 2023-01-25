@@ -39,7 +39,7 @@ void setup() {
   motor.init();
   // align sensor and start FOC
   motor.initFOC();
-  motor.target = 1.0; // Volts 
+  motor.target = 4.0; // Volts 
 
 }
 
@@ -52,17 +52,4 @@ void loop() {
   Serial.println(sensor.getVelocity());
   // Motion control function
   motor.move();
-}
-
-void blink(int amount, int del)
-{
-  pinMode(LEDPIN, OUTPUT);
-
-  for (int i = 0; i < amount; i++)
-  {
-    digitalWrite(LEDPIN, HIGH);
-    delay(del);
-    digitalWrite(LEDPIN, LOW);
-    delay(del);
-  }
 }

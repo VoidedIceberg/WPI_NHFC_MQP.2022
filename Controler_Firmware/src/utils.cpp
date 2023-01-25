@@ -14,3 +14,11 @@ void blink(int amount, int del)
         delay(del);
     }
 }
+
+float calculateFakeForces(MagneticSensorI2C sensor)
+{  
+    float angle = sensor.getAngle();
+    float velocity = sensor.getVelocity();   
+
+    return 0.0;
+}
