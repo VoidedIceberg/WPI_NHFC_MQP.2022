@@ -18,8 +18,8 @@ ros::NodeHandle nh;
 
 // create linearPublisher and rotationPublisher
 std_msgs::String lin_msg, rot_msg;
-ros::Publisher linearPub("linear_pub", &lin_msg);
-ros::Publisher rotPub("rotation_pub", &rot_msg);
+ros::Publisher linearPub("/linear_pub", &lin_msg);
+ros::Publisher rotPub("/rotation_pub", &rot_msg);
 // ros::Subscriber<std_msgs::String> linSub("") 
 
 BLDCMotor ROT_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
@@ -36,7 +36,7 @@ void setup()
 {
   // put your setup code here, to run once:
 
-  Serial1.begin(115200); // initialize serial communication on the CDC USB port
+  Serial1.begin(9600); // initialize serial communication on the CDC USB port
   initI2C();
   initMotor(ROT_MOTOR, ROT_DRIVER, ROT_ENCODER);
   initMotor(LIN_MOTOR, LIN_DRIVER, LIN_ENCODER);
@@ -46,8 +46,8 @@ void setup()
   nh.advertise(linearPub);
   nh.advertise(rotPub);
 
-  LIN_MOTOR.target = 0;
-  ROT_MOTOR.target = 0;
+  LIN_MOTOR.target = 10;
+  ROT_MOTOR.target = 10;
 }
 
 // reading directly from motor
@@ -94,6 +94,8 @@ void loop()
   // Makes sure the motors run on every loop
   LIN_MOTOR.loopFOC();
   ROT_MOTOR.loopFOC();
+  // printf("%f", LIN_MOTOR.target);
+  // delay(1000);
   blink(1, 0);
 
   // system running
