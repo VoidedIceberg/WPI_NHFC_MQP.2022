@@ -6,14 +6,12 @@ import os, fcntl, termios, sys
 prevRot = None # current rotation
 prevD = None # current distance
 
-# display the ports on the current device
 ports = serial.tools.list_ports.comports()
 portsList = []
 for onePort in ports:
     portsList.append(str(onePort))
     print(str(ports.index(onePort)+1) + " " + str(onePort))
 
-# type the number of the port ex. 1 as the first 2 as the second
 port = input("Select Port: ")
 defaultPort = 3
 port = portsList[int(port)-1].split(" ")[0]
