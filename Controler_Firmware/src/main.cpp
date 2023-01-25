@@ -50,6 +50,24 @@ void setup()
   ROT_MOTOR.target = 0;
 }
 
+// reading directly from motor
+float read(){
+    float linear = LIN_MOTOR.target;
+    float rot = ROT_MOTOR.target;
+    return linear, rot;
+}
+
+// ask publisher to publish the topic
+void publish(){
+  float linear, rot = read();
+  char l[] = {(char)(linear)};
+  char r[] = {(char)(rot)};
+  lin_msg.data = l;
+  rot_msg.data = r;
+  linearPub.publish(&lin_msg);
+  rotPub.publish(&rot_msg);
+}
+
 void loop()
 {
   switch (state)
@@ -80,7 +98,7 @@ void loop()
 
   // system running
   nh.spinOnce();
-  delay(10);
+  publish();
 }
 
 void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder)
@@ -105,22 +123,4 @@ void initI2C()
   Wire.setSDA(I2C_SDA_PIN);
   Wire.setSCL(I2C_SCL_PIN);
   Wire.begin(SLAVEADDRESS);
-}
-
-// reading directly from motor
-float read(){
-    float linear = LIN_MOTOR.target;
-    float rot = ROT_MOTOR.target;
-    return linear, rot;
-}
-
-// ask publisher to publish the topic
-void publish(){
-  float linear, rot = read();
-  char l[] = {(char)(linear)};
-  char r[] = {(char)(rot)};
-  lin_msg.data = l;
-  rot_msg.data = r;
-  linearPub.publish(&lin_msg);
-  rotPub.publish(&rot_msg);
 }
