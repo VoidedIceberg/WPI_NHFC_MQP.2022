@@ -7,12 +7,13 @@
 #include <std_msgs/String.h>
 #include <string.h>
 
+
 // DM:PA11  DP:PA12
 // setup the harware serial1
 // HardwareSerial Serial1(PA_11, PA_12);
 
 // init a node handler
-ros::NodeHandle nh;
+// ros::NodeHandle nh;
 
 // create linearPublisher and rotationPublisher
 // std_msgs::String lin_msg, rot_msg;
@@ -48,8 +49,8 @@ void tCsetup()
     blink(1, 200);
 
     // Initialize ROS
-    nh.initNode();
-    nh.advertise(pub);
+    // nh.initNode();
+    // nh.advertise(pub);
 
     tCinitI2C();
     sensor.init();
@@ -93,5 +94,5 @@ void tCloop()
     Serial.println(sensor.getVelocity());
     // Motion control function
     motor.move();
-    nh.spinOnce();
+    // nh.spinOnce();
 }

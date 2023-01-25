@@ -65,26 +65,26 @@ void loop()
   // blink(1, 0);
 }
 
-void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder)
-{
-  encoder.init();
-  driver.init();
-  driver.voltage_power_supply = VCC;
-  motor.voltage_limit = VOLTAGE_LIMIT;
-  motor.velocity_limit = VELOCITY_LIMIT;
-  motor.linkDriver(&driver);
-  motor.linkSensor(&encoder);
-  motor.torque_controller = TorqueControlType::voltage;
-  motor.controller = MotionControlType::torque;
-  motor.useMonitoring(Serial);
-  motor.init();
-  motor.initFOC();
-  motor.target = 0;
-}
+// void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder)
+// {
+//   encoder.init();
+//   driver.init();
+//   driver.voltage_power_supply = VCC;
+//   motor.voltage_limit = VOLTAGE_LIMIT;
+//   motor.velocity_limit = VELOCITY_LIMIT;
+//   motor.linkDriver(&driver);
+//   motor.linkSensor(&encoder);
+//   motor.torque_controller = TorqueControlType::voltage;
+//   motor.controller = MotionControlType::torque;
+//   motor.useMonitoring(Serial);
+//   motor.init();
+//   motor.initFOC();
+//   motor.target = 0;
+// }
 
-void initI2C()
-{
-  Wire.setSDA(I2C_SDA_PIN);
-  Wire.setSCL(I2C_SCL_PIN);
-  Wire.begin(SLAVEADDRESS);
-}
+// void initI2C()
+// {
+//   Wire.setSDA(I2C_SDA_PIN);
+//   Wire.setSCL(I2C_SCL_PIN);
+//   Wire.begin(SLAVEADDRESS);
+// }

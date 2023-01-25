@@ -5,6 +5,8 @@ import os, fcntl, termios, sys
 # global variables
 prevRot = None # current rotation
 prevD = None # current distance
+pth = None # current voltage
+pV = None
 
 ports = serial.tools.list_ports.comports()
 portsList = []
@@ -29,19 +31,32 @@ serialHandler.close()
 
 serialHandler.open()
 
+# def isOutputLegal(output): # check if the output is legal
+#     if len(output) < 3: # check if the output is completed
+#         return 0
+#     return 1
+
 def isOutputLegal(output): # check if the output is legal
-    if len(output) < 3: # check if the output is completed
+    if len(output) < 2: # check if the output is completed
         return 0
     return 1
 
 def error(x, ref): # compare the data
     return abs(x - ref)
 
-def isDataAvailable(rot, d): # check if the data is continous
-    global prevD, prevRot
-    print("debugging\t", (prevRot, prevD), (rot, d))
+# def isDataAvailable(rot, d): # check if the data is continous
+#     global prevD, prevRot
+#     print("debugging\t", (prevRot, prevD), (rot, d))
+#     # time.sleep(2)
+#     if error(rot,prevRot)>=2 or error(d,prevD)>=100:
+#         return 0
+#     return 1
+
+def isDataAvailable(th, V): # check if the data is continous
+    global pth, pV
+    print("debugging\t", (pth, pV), (th, V))
     # time.sleep(2)
-    if error(rot,prevRot)>=2 or error(d,prevD)>=100:
+    if error(pth, th)>=100 or error(pV, V)>=1:
         return 0
     return 1
 
@@ -52,18 +67,25 @@ while True:
     try:
         if serialHandler.in_waiting:
             packet = serialHandler.readline()
-            output = packet.decode('utf').split(' ')
+            # output = packet.decode('utf').split(' ')
+            output = packet.decode('ascii').split('\t')
+            # print(output)
             if isOutputLegal(output):
-                rot = float(output[1])
-                d = float(output[2])
+                # rot = float(output[1])
+                # d = float(output[2])
+                theta = float(output[0])
+                V = float(output[1])
                 # print("legal in " + str(index))
             else:
                 print("illegal in" + str(index))
-            if prevD == prevRot == None or isDataAvailable(rot, d):
-                prevRot = rot
-                prevD = d
+            if prevD == prevRot == None or isDataAvailable(theta, V):
+                # prevRot = rot
+                # prevD = d
+                pth = theta
+                pV = V
                 # print("available in " + str(index))
-                print(rot, d)
+                # print(rot, d)
+                print(theta, V)
             else:
                 print("unavailable in " + str(index))
             # time.sleep(3)
