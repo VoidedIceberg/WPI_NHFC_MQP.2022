@@ -21,7 +21,6 @@ ros::NodeHandle nh;
 std_msgs::String lin_msg, rot_msg;
 ros::Publisher linearPub("/linear_pub", &lin_msg);
 ros::Publisher rotPub("/rotation_pub", &rot_msg);
-// ros::Subscriber<std_msgs::String> linSub("") 
 
 BLDCMotor ROT_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
 BLDCDriver3PWM ROT_DRIVER = BLDCDriver3PWM(PC0, PC1, PC2, PC13); // M1 Port
