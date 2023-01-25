@@ -7,7 +7,6 @@
 #include <std_msgs/String.h>
 #include <string.h>
 
-
 // DM:PA11  DP:PA12
 // setup the harware serial1
 // HardwareSerial Serial1(PA_11, PA_12);
@@ -67,7 +66,7 @@ void tCsetup()
     motor.init();
     // align sensor and start FOC
     motor.initFOC();
-    motor.target = 1.0; // Volts
+    motor.target = 0.5; // Volts
 }
 
 // reading directly from motor
