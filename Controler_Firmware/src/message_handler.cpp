@@ -1,6 +1,5 @@
 #include <message_handler.h>
 #include <SimpleFOC.h>
-#include <loadCell.h>
 
 float lastROTAngle = 0.0;
 float lastLinAngle = 0.0;
@@ -16,9 +15,9 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 
     // Send the movement to the PC host
     Serial.print("M ");
-    Serial.print(currentRotAngle);
+    Serial.print(currentRotAngle - lastROTAngle);
     Serial.print(" ");
-    Serial.println(angleToLinear(currentLinAngle));
+    Serial.println(angleToLinear(currentLinAngle - lastLinAngle));
 
     lastROTAngle = currentRotAngle;
     lastLinAngle = currentLinAngle;
@@ -90,11 +89,9 @@ void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
             ROT_MOTOR.move();
         } else if (message[0] == 'R')
         {
-            initLoadCell();
             int motor = -1;
             float nextTargetV = 0.0;
             sscanf(message, "F %d %f", &motor, &nextTargetV);
-            Serial.println(nextTargetV);
             if (motor > -1)
             {
                 switch (motor)
@@ -115,9 +112,6 @@ void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
                 Serial.println("Please format in: 'R {motor 0:Rot 1:lin} {optional: targetV}");
             }
         }
-        else{
-            Serial.println("Unknown command");
-        }
     }
 }
 float voltageTesting = 0.0;
@@ -126,27 +120,14 @@ void calibrationRotine(BLDCMotor motor, float targetV)
 {
     if (targetV > 0.0)
     {
-        float currentV = 0.0;
-        for (currentV; currentV < targetV; currentV += 0.01)
-        {
-            motor.target = currentV;
-            motor.loopFOC();
-            motor.move();
-            Serial.print("T ");
-            Serial.print(targetV);
-            Serial.print(" ");
-            Serial.println(readLoadCell());
-        }
+        voltageTesting = targetV;
     }
     else
     {
         voltageTesting += 0.01;
-        motor.target = voltageTesting;
-        motor.loopFOC();
-        motor.move();
-        Serial.print("T ");
-        Serial.print(voltageTesting);
-        Serial.print(" ");
-        Serial.println(readLoadCell());
     }
+    motor.target = voltageTesting;
+    motor.move();
+    Serial.print("T ");
+    Serial.print(voltageTesting);
 }

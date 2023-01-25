@@ -1,8 +1,8 @@
-// #ifndef TorqueControl_H_
-// #define TorqueControl_H_
+#ifndef TorqueControl_H_
+#define TorqueControl_H_
 
-// void tCloop();
-// void tCsetup();
-// void tCinitI2C();
+void tCloop();
+void tCsetup();
+void tCinitI2C();
 
-// #endif // TorqueControl_H_
+#endif // TorqueControl_H_
