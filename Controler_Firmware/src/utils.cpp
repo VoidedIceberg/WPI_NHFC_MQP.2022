@@ -22,3 +22,24 @@ float calculateFakeForces(MagneticSensorI2C sensor)
 
     return 0.0;
 }
+
+void TCA9548A(uint8_t bus)
+{
+    Wire.beginTransmission(0x70);
+    Wire.write(1 << bus);
+    Wire.endTransmission();
+}
+
+float readLINencoder(MagneticSensorI2C sensor)
+{
+  TCA9548A(0);
+  sensor.update();
+  return sensor.getAngle();
+}
+
+float readROTencoder(MagneticSensorI2C sensor)
+{
+  TCA9548A(1);
+  sensor.update();
+  return sensor.getAngle();
+}

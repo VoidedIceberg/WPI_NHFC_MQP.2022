@@ -1,5 +1,6 @@
 #include <message_handler.h>
 #include <SimpleFOC.h>
+#include <utils.h>
 
 float lastROTAngle = 0.0;
 float lastLinAngle = 0.0;
@@ -10,17 +11,14 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 {
     ROT_ENCODER.update();
     LIN_ENCODER.update();
-    float currentRotAngle = ROT_ENCODER.getAngle();
-    float currentLinAngle = LIN_ENCODER.getAngle();
+    float currentRotAngle = readROTencoder(ROT_ENCODER);
+    float currentLinAngle = readLINencoder(LIN_ENCODER);
 
     // Send the movement to the PC host
     Serial.print("M ");
-    Serial.print(currentRotAngle - lastROTAngle);
+    Serial.print(currentRotAngle);
     Serial.print(" ");
-    Serial.println(angleToLinear(currentLinAngle - lastLinAngle));
-
-    lastROTAngle = currentRotAngle;
-    lastLinAngle = currentLinAngle;
+    Serial.println(angleToLinear(currentLinAngle));
 }
 
 // Function to convert the angle to a linear measurement
@@ -91,7 +89,8 @@ void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
         {
             int motor = -1;
             float nextTargetV = 0.0;
-            sscanf(message, "F %d %f", &motor, &nextTargetV);
+            sscanf(message, "R %d %f", &motor, &nextTargetV);
+            Serial.println(nextTargetV);
             if (motor > -1)
             {
                 switch (motor)
@@ -111,6 +110,9 @@ void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
             {
                 Serial.println("Please format in: 'R {motor 0:Rot 1:lin} {optional: targetV}");
             }
+        }
+        else{
+            Serial.println("Unknown command");
         }
     }
 }

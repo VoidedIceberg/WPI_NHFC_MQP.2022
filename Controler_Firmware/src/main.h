@@ -27,6 +27,7 @@ enum STATE
 };
 
 void initI2C(void);
-void initMotor(BLDCMotor motor, BLDCDriver3PWM driver, MagneticSensorI2C encoder);
+void initMotor(BLDCMotor motor, int MUX_CHANNEL, BLDCDriver3PWM driver, MagneticSensorI2C encoder);
+void loopFOC_Override(BLDCMotor motor, int MUX_CHANNEl);
 
 #endif // MAIN_H_
