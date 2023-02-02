@@ -20,8 +20,8 @@ void setup()
 
   Serial.begin(9600); // initialize serial communication on the CDC USB port
   initI2C();
-  initMotor(ROT_MOTOR,1, ROT_DRIVER, ROT_ENCODER);
-  initMotor(LIN_MOTOR,0, LIN_DRIVER, LIN_ENCODER);
+  initMotor(&ROT_MOTOR,1, &ROT_DRIVER, &ROT_ENCODER);
+  initMotor(&LIN_MOTOR,0, &LIN_DRIVER, &LIN_ENCODER);
 
   LIN_MOTOR.target = 0;
   ROT_MOTOR.target = 0;
@@ -50,47 +50,39 @@ void loop()
     break;
   }
   // // Makes sure the motors run on every loop
-  TCA9548A(0);
+  TCA9548A(1);
   ROT_ENCODER.update();
-  ROT_MOTOR.target = 1.0;
-  Serial.print(ROT_ENCODER.getAngle());
-  Serial.print("\t");
-
-  TCA9548A(1);
-  LIN_ENCODER.update();
-  Serial.println(LIN_ENCODER.getAngle());
-  LIN_MOTOR.target = 1.0;
+  ROT_MOTOR.loopFOC();
+  ROT_MOTOR.move();
 
   TCA9548A(0);
-  ROT_MOTOR.loopFOC();
-  ROT_MOTOR.move(); 
-  TCA9548A(1);
+  LIN_ENCODER.update();
   LIN_MOTOR.loopFOC();
   LIN_MOTOR.move();
 
   blink(1, 0);
 }
 
-void initMotor(BLDCMotor motor,int MUX_CHANNEL,  BLDCDriver3PWM driver, MagneticSensorI2C encoder)
+void initMotor(BLDCMotor* motor,int MUX_CHANNEL,  BLDCDriver3PWM* driver, MagneticSensorI2C* encoder)
 {
   TCA9548A(MUX_CHANNEL); // makes sure it switches into the right channel for initilization
-  encoder.init();
-  motor.linkSensor(&encoder);
+  encoder->init();
+  motor->linkSensor(encoder);
 
-  driver.voltage_power_supply = VCC;
-  driver.init();
-  motor.linkDriver(&driver);
-  motor.voltage_sensor_align = 5.0;
-  motor.torque_controller = TorqueControlType::voltage;
-  motor.controller = MotionControlType::torque;
+  driver->voltage_power_supply = VCC;
+  driver->init();
+  motor->linkDriver(driver);
+  motor->voltage_sensor_align = 5.0;
+  motor->torque_controller = TorqueControlType::voltage;
+  motor->controller = MotionControlType::torque;
 
-  motor.voltage_limit = VOLTAGE_LIMIT;
-  motor.velocity_limit = VELOCITY_LIMIT;
-  motor.useMonitoring(Serial);
-  motor.init();
+  // motor.voltage_limit = VOLTAGE_LIMIT;
+  // motor.velocity_limit = VELOCITY_LIMIT;
+  motor->useMonitoring(Serial);
+  motor->init();
   TCA9548A(MUX_CHANNEL); // makes sure it switches into the right channel for initilization
-  motor.initFOC();
-  motor.target = 0.0;
+  motor->initFOC();
+  motor->target = 0.0;
 }
 
 void initI2C()

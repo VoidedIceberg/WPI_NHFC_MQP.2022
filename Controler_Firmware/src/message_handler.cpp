@@ -87,8 +87,6 @@ void handelMessage(USBSerial serial, BLDCMotor* ROT_MOTOR, BLDCMotor* LIN_MOTOR)
             Serial.print(" AND ");
             Serial.println(y);
             // Set the target for the motors
-            // ROT_MOTOR.target = forceToRotVoltage(rot);
-            // LIN_MOTOR.target = forceToLinVoltage(lin);
             ROT_MOTOR->target = x;
             LIN_MOTOR->target = y;
             LIN_MOTOR->move();
