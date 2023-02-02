@@ -13,7 +13,7 @@
 #define I2C_SCL_PIN PB8
 #define SLAVEADDRESS 0x8
 
-#define VOLTAGE_LIMIT 1.4
+#define VOLTAGE_LIMIT 5.0
 #define VELOCITY_LIMIT 3
 #define VCC 8.4
 
@@ -28,6 +28,5 @@ enum STATE
 
 void initI2C(void);
 void initMotor(BLDCMotor motor, int MUX_CHANNEL, BLDCDriver3PWM driver, MagneticSensorI2C encoder);
-void loopFOC_Override(BLDCMotor motor, int MUX_CHANNEl);
 
 #endif // MAIN_H_

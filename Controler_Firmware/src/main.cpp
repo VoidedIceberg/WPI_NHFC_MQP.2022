@@ -37,12 +37,12 @@ void loop()
   case READING:
     if (Serial.available() > 0)
     {
-      handelMessage(Serial, ROT_MOTOR, LIN_MOTOR);
+      handelMessage(Serial, &ROT_MOTOR, &LIN_MOTOR);
     }
     state = SENDING;
     break;
   case SENDING:
-    sendMovement(ROT_ENCODER, LIN_ENCODER);
+    // sendMovement(ROT_ENCODER, LIN_ENCODER);
     state = READING;
     break;
   default:
@@ -50,8 +50,23 @@ void loop()
     break;
   }
   // // Makes sure the motors run on every loop
-  loopFOC_Override(ROT_MOTOR, 1);
-  // loopFOC_Override(LIN_MOTOR, 0);
+  TCA9548A(0);
+  ROT_ENCODER.update();
+  ROT_MOTOR.target = 1.0;
+  Serial.print(ROT_ENCODER.getAngle());
+  Serial.print("\t");
+
+  TCA9548A(1);
+  LIN_ENCODER.update();
+  Serial.println(LIN_ENCODER.getAngle());
+  LIN_MOTOR.target = 1.0;
+
+  TCA9548A(0);
+  ROT_MOTOR.loopFOC();
+  ROT_MOTOR.move(); 
+  TCA9548A(1);
+  LIN_MOTOR.loopFOC();
+  LIN_MOTOR.move();
 
   blink(1, 0);
 }
@@ -60,19 +75,22 @@ void initMotor(BLDCMotor motor,int MUX_CHANNEL,  BLDCDriver3PWM driver, Magnetic
 {
   TCA9548A(MUX_CHANNEL); // makes sure it switches into the right channel for initilization
   encoder.init();
-
-  driver.init();
-  driver.voltage_power_supply = VCC;
-  motor.voltage_limit = VOLTAGE_LIMIT;
-  motor.velocity_limit = VELOCITY_LIMIT;
-  motor.linkDriver(&driver);
   motor.linkSensor(&encoder);
+
+  driver.voltage_power_supply = VCC;
+  driver.init();
+  motor.linkDriver(&driver);
+  motor.voltage_sensor_align = 5.0;
   motor.torque_controller = TorqueControlType::voltage;
   motor.controller = MotionControlType::torque;
+
+  motor.voltage_limit = VOLTAGE_LIMIT;
+  motor.velocity_limit = VELOCITY_LIMIT;
   motor.useMonitoring(Serial);
   motor.init();
+  TCA9548A(MUX_CHANNEL); // makes sure it switches into the right channel for initilization
   motor.initFOC();
-  motor.target = 0;
+  motor.target = 0.0;
 }
 
 void initI2C()
@@ -82,26 +100,4 @@ void initI2C()
   Wire.begin(SLAVEADDRESS);
 }
 
-void loopFOC_Override(BLDCMotor  motor, int MUX_CHANNEl)
-{
-  // update sensor - do this even in open-loop mode, as user may be switching between modes and we could lose track
-  //                 of full rotations otherwise.
-  if (MUX_CHANNEl == 0)
-  {
-    readLINencoder(LIN_ENCODER); // if you dont do this it will update with the wrong value
-  }
-  else
-  {
-    readROTencoder(ROT_ENCODER);
-  }
-  Serial.println("got here 1");
-
-  // Needs the update() to be called first
-  // This function will not have numerical issues because it uses Sensor::getMechanicalAngle()
-  // which is in range 0-2PI
-  motor.electrical_angle = motor.electricalAngle();
-  Serial.println("got here 2");
-  // set the phase voltage - FOC heart function :)
-  motor.setPhaseVoltage(motor.voltage.q, motor.voltage.d, motor.electrical_angle);
-}
 
