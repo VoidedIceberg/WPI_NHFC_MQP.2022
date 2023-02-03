@@ -1,5 +1,8 @@
 #include <message_handler.h>
 #include <SimpleFOC.h>
+#include <utils.h>
+#include <sstream>
+using namespace std;
 
 float lastROTAngle = 0.0;
 float lastLinAngle = 0.0;
@@ -10,17 +13,14 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 {
     ROT_ENCODER.update();
     LIN_ENCODER.update();
-    float currentRotAngle = ROT_ENCODER.getAngle();
-    float currentLinAngle = LIN_ENCODER.getAngle();
+    float currentRotAngle = readROTencoder(ROT_ENCODER);
+    float currentLinAngle = readLINencoder(LIN_ENCODER);
 
     // Send the movement to the PC host
     Serial.print("M ");
-    Serial.print(currentRotAngle - lastROTAngle);
+    Serial.print(currentRotAngle);
     Serial.print(" ");
-    Serial.println(angleToLinear(currentLinAngle - lastLinAngle));
-
-    lastROTAngle = currentRotAngle;
-    lastLinAngle = currentLinAngle;
+    Serial.println(angleToLinear(currentLinAngle));
 }
 
 // Function to convert the angle to a linear measurement
@@ -65,42 +65,47 @@ float forceToRotVoltage(float force)
 }
 
 // Function handels incomming message on the serial port and sets the motors target accordingly
-void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
+void handelMessage(USBSerial serial, BLDCMotor* ROT_MOTOR, BLDCMotor* LIN_MOTOR)
 {
     // Check if there is a message from the PC host
     if (serial.available())
     {
         // Read the message
-        char message[10];
-        serial.readBytes(message, 10);
-
+        char message[12];
+        serial.readBytes(message, 12);
+        Serial.println(message);
         // Check if the message is a movement command
         if (message[0] == 'F')
         {
+            message[0] = ' ';
+            Serial.println("F");
             // Read the movement command
-            float rot = 0.0;
-            float lin = 0.0;
-            sscanf(message, "F %f %f", &rot, &lin);
-
+            std::istringstream iss{message};
+            float x{}, y{};
+            iss >> x >> y;
+            Serial.print(x);
+            Serial.print(" AND ");
+            Serial.println(y);
             // Set the target for the motors
-            ROT_MOTOR.target = forceToRotVoltage(rot);
-            LIN_MOTOR.target = forceToLinVoltage(lin);
-            LIN_MOTOR.move();
-            ROT_MOTOR.move();
+            ROT_MOTOR->target = x;
+            LIN_MOTOR->target = y;
+            LIN_MOTOR->move();
+            ROT_MOTOR->move();
         } else if (message[0] == 'R')
         {
             int motor = -1;
             float nextTargetV = 0.0;
-            sscanf(message, "F %d %f", &motor, &nextTargetV);
+            sscanf(message, "R %d %f", &motor, &nextTargetV);
+            Serial.println(nextTargetV);
             if (motor > -1)
             {
                 switch (motor)
                 {
                 case 0: // rot motor
-                    calibrationRotine(ROT_MOTOR, nextTargetV);
+                    // calibrationRotine(&ROT_MOTOR, nextTargetV);
                     break;
                 case 1:
-                    calibrationRotine(LIN_MOTOR, nextTargetV);
+                    // calibrationRotine(&LIN_MOTOR, nextTargetV);
                     break;
                 default:
                     Serial.println("What motor?");
@@ -111,6 +116,9 @@ void handelMessage(USBSerial serial, BLDCMotor ROT_MOTOR, BLDCMotor LIN_MOTOR)
             {
                 Serial.println("Please format in: 'R {motor 0:Rot 1:lin} {optional: targetV}");
             }
+        }
+        else{
+            Serial.println("Unknown command");
         }
     }
 }

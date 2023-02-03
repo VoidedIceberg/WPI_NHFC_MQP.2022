@@ -6,6 +6,10 @@
 		{
 			"name": "Controler_Firmware",
 			"path": "Controler_Firmware"
+		},
+		{
+			"name": "Hardware Testing",
+			"path": "../../../../before 2019/everyting eles/Documents/PlatformIO/Projects/Hardware Testing"
 		}
 	],
 	"settings": {}
