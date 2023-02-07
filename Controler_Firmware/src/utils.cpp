@@ -43,3 +43,4 @@ float readROTencoder(MagneticSensorI2C sensor)
   sensor.update();
   return sensor.getAngle();
 }
+

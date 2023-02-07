@@ -2,7 +2,11 @@
 #include <SimpleFOC.h>
 #include <utils.h>
 #include <sstream>
+#include <GCodeParser.h>
+
 using namespace std;
+
+GCodeParser GCode = GCodeParser();
 
 float lastROTAngle = 0.0;
 float lastLinAngle = 0.0;
@@ -26,7 +30,7 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 // Function to convert the angle to a linear measurement
 float angleToLinear(float angle)
 {
-    int diameter = 20 ; // mm
+    int diameter = 20; // mm
     return angle * 3.14 * diameter;
 }
 
@@ -34,7 +38,7 @@ float angleToLinear(float angle)
 float forceToLinVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (-0.0017 * (force*force) + 0.3953*force -1.7699) / 1.0; // needs a conversion factor to even make since
+    float voltage = (-0.0017 * (force * force) + 0.3953 * force - 1.7699) / 1.0; // needs a conversion factor to even make since
     if (voltage >= 0.0 || voltage < 1.2)
     {
         return voltage;
@@ -65,63 +69,63 @@ float forceToRotVoltage(float force)
 }
 
 // Function handels incomming message on the serial port and sets the motors target accordingly
-void handelMessage(USBSerial serial, BLDCMotor* ROT_MOTOR, BLDCMotor* LIN_MOTOR)
+void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
 {
-    // Check if there is a message from the PC host
-    if (serial.available())
+    if (serial.available() > 0)
     {
-        // Read the message
-        char message[12];
-        serial.readBytes(message, 12);
-        Serial.println(message);
-        // Check if the message is a movement command
-        if (message[0] == 'F')
+        if (GCode.AddCharToLine(Serial.read()))
         {
-            message[0] = ' ';
-            Serial.println("F");
-            // Read the movement command
-            std::istringstream iss{message};
-            float x{}, y{};
-            iss >> x >> y;
-            Serial.print(x);
-            Serial.print(" AND ");
-            Serial.println(y);
-            // Set the target for the motors
-            ROT_MOTOR->target = x;
-            LIN_MOTOR->target = y;
-            LIN_MOTOR->move();
-            ROT_MOTOR->move();
-        } else if (message[0] == 'R')
-        {
-            int motor = -1;
-            float nextTargetV = 0.0;
-            sscanf(message, "R %d %f", &motor, &nextTargetV);
-            Serial.println(nextTargetV);
-            if (motor > -1)
+            GCode.ParseLine();
+            // Code to process the line of G-Code here…
+
+            Serial.print("Command Line: ");
+            Serial.println(GCode.line);
+
+            GCode.RemoveCommentSeparators();
+
+            if (GCode.HasWord('F'))
             {
-                switch (motor)
+                Serial.print("Process F code: ");
+                float R, L = 0.0;
+                if (GCode.HasWord('R'))
                 {
-                case 0: // rot motor
+                    Serial.print("Process R code: ");
+                    R = (float)GCode.GetWordValue('R');
+                }
+                if (GCode.HasWord('L'))
+                {
+                    Serial.print("Process L code: ");
+                    L = (float)GCode.GetWordValue('L');
+                }
+                    Serial.print("R ");
+                    Serial.print(R);
+                    Serial.print(" L ");
+                    Serial.println(L);
+
+                    ROT_MOTOR->target = R;
+                    LIN_MOTOR->target = L;
+                }
+            else if (GCode.HasWord('R'))
+            {
+                float nextTargetV = 0.0;
+                Serial.print("Process R code: ");
+                int R, L = 0;
+                R = (int)GCode.GetWordValue('R');
+                L = (int)GCode.GetWordValue('L');
+
+                if (R == 1)
+                {
                     // calibrationRotine(&ROT_MOTOR, nextTargetV);
-                    break;
-                case 1:
+                }
+                else if (L == 1)
+                {
                     // calibrationRotine(&LIN_MOTOR, nextTargetV);
-                    break;
-                default:
-                    Serial.println("What motor?");
-                    break;
                 }
             }
-            else
-            {
-                Serial.println("Please format in: 'R {motor 0:Rot 1:lin} {optional: targetV}");
-            }
-        }
-        else{
-            Serial.println("Unknown command");
         }
     }
 }
+
 float voltageTesting = 0.0;
 
 void calibrationRotine(BLDCMotor motor, float targetV)
