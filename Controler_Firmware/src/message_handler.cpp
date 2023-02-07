@@ -77,41 +77,50 @@ void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
         {
             GCode.ParseLine();
             // Code to process the line of G-Code here…
-
-            Serial.print("Command Line: ");
-            Serial.println(GCode.line);
-
             GCode.RemoveCommentSeparators();
 
             if (GCode.HasWord('F'))
             {
-                Serial.print("Process F code: ");
                 float R, L = 0.0;
                 if (GCode.HasWord('R'))
                 {
-                    Serial.print("Process R code: ");
                     R = (float)GCode.GetWordValue('R');
                 }
                 if (GCode.HasWord('L'))
                 {
-                    Serial.print("Process L code: ");
                     L = (float)GCode.GetWordValue('L');
                 }
-                    Serial.print("R ");
-                    Serial.print(R);
-                    Serial.print(" L ");
-                    Serial.println(L);
 
-                    ROT_MOTOR->target = R;
-                    LIN_MOTOR->target = L;
+                ROT_MOTOR->target = forceToRotVoltage(R);
+                LIN_MOTOR->target = forceToLinVoltage(L);
+            }
+            else if (GCode.HasWord('V'))
+            {
+                float R, L = 0.0;
+                if (GCode.HasWord('R'))
+                {
+                    R = (float)GCode.GetWordValue('R');
                 }
-            else if (GCode.HasWord('R'))
+                if (GCode.HasWord('L'))
+                {
+                    L = (float)GCode.GetWordValue('L');
+                }
+
+                ROT_MOTOR->target = (abs(R) < 2.1) ? R : 0.0;
+                LIN_MOTOR->target = (abs(L) < 2.1) ? L : 0.0;
+            }
+            else if (GCode.HasWord('C'))
             {
                 float nextTargetV = 0.0;
-                Serial.print("Process R code: ");
                 int R, L = 0;
-                R = (int)GCode.GetWordValue('R');
-                L = (int)GCode.GetWordValue('L');
+                if (GCode.HasWord('R'))
+                {
+                    R = (int)GCode.GetWordValue('R');
+                }
+                else if (GCode.HasWord('L'))
+                {
+                    L = (int)GCode.GetWordValue('L');
+                }
 
                 if (R == 1)
                 {
