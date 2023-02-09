@@ -3,6 +3,7 @@
 #include <utils.h>
 #include <sstream>
 #include <GCodeParser.h>
+#include <loadCell.h>
 
 using namespace std;
 
@@ -111,7 +112,6 @@ void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
             }
             else if (GCode.HasWord('C'))
             {
-                float nextTargetV = 0.0;
                 int R, L = 0;
                 if (GCode.HasWord('R'))
                 {
@@ -124,12 +124,17 @@ void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
 
                 if (R == 1)
                 {
-                    // calibrationRotine(&ROT_MOTOR, nextTargetV);
+                    ;
                 }
                 else if (L == 1)
                 {
-                    // calibrationRotine(&LIN_MOTOR, nextTargetV);
+                    calibrateLinear(LIN_MOTOR);
                 }
+            }
+            else if (GCode.HasWord('Z'))
+            {
+                initLoadCell();
+                Serial.println(readLoadCell());
             }
         }
     }

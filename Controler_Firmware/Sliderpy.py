@@ -8,7 +8,7 @@ cntrler = serial.Serial('COM6', 9600, timeout=.1)
 def show_values():
     global cntrler
     print(w1.get(), w2.get())
-    send = "F R" + str(w1.get()) + " L" + str(w2.get()) + "\n"
+    send = "V R" + str(w1.get()) + " L" + str(w2.get()) + "\n"
     print(send)
     cntrler.write(send.encode())
 
