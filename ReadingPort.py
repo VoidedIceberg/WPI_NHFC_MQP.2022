@@ -15,7 +15,6 @@ for onePort in ports:
     print(str(ports.index(onePort)+1) + " " + str(onePort))
 
 port = input("Select Port: ")
-defaultPort = 3
 port = portsList[int(port)-1].split(" ")[0]
 print("chosen: " + port)
 
