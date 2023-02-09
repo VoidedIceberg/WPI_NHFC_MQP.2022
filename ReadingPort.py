@@ -3,9 +3,7 @@ import re
 
 # global variables
 prevRot = None # current rotation
-prevD = None # current distance
-pth = None # current voltage
-pV = None
+prevLin = None # current linear
 
 ports = serial.tools.list_ports.comports()
 portsList = []
@@ -35,19 +33,11 @@ def isOutputLegal(output): # check if the output is legal
 def error(x, ref): # compare the data
     return abs(x - ref)
 
-def isDataAvailable(rot, d): # check if the data is continous
-    global prevD, prevRot
-    print("debugging\t", (prevRot, prevD), (rot, d))
+def isDataAvailable(rot, lin): # check if the data is continous
+    global prevLin, prevRot
+    print("debugging\t", (prevRot, prevLin), (rot, lin))
     # time.sleep(2)
-    if error(rot,prevRot)>=2 or error(d,prevD)>=100:
-        return 0
-    return 1
-
-def isDataAvailable(th, V): # check if the data is continous
-    global pth, pV
-    print("debugging\t", (pth, pV), (th, V))
-    # time.sleep(2)
-    if error(pth, th)>=100 or error(pV, V)>=1:
+    if error(rot,prevRot)>=1 or error(lin, prevLin)>=1:
         return 0
     return 1
 
