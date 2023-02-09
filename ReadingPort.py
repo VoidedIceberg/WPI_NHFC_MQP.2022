@@ -1,6 +1,5 @@
 import serial.tools.list_ports, serial
-import time
-import os, fcntl, termios, sys
+import re
 
 # global variables
 prevRot = None # current rotation
@@ -63,21 +62,18 @@ while True:
             output = packet.decode('ascii').split('\t')
             # print(output)
             if isOutputLegal(output):
-                rot = float(output[1])
-                d = float(output[2])
-                # theta = float(output[0])
-                # V = float(output[1])
-                # print("legal in " + str(index))
+                R_part = output[1]
+                re.sub("\D", "", R_part)
+                L_part = output[2]
+                re.sub("\D" "", L_part)
+                rot = float(R_part)
+                lin = float(L_part)
             else:
                 print("illegal in" + str(index))
-            if prevD == prevRot == None or isDataAvailable(rot, d):
+            if prevD == prevRot == None or isDataAvailable(rot, lin):
                 prevRot = rot
-                prevD = d
-                # pth = theta
-                # pV = V
-                # print("available in " + str(index))
-                print(rot, d)
-                # print(theta, V)
+                prevD = lin
+                print(rot, lin)
             else:
                 print("unavailable in " + str(index))
             # time.sleep(3)
