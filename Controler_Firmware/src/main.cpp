@@ -42,7 +42,7 @@ void loop()
     state = SENDING;
     break;
   case SENDING:
-    // sendMovement(ROT_ENCODER, LIN_ENCODER);
+    sendMovement(ROT_ENCODER, LIN_ENCODER);
     state = READING;
     break;
   default:
