@@ -23,8 +23,9 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
 
     // Send the movement to the PC host
     Serial.print("M ");
+    Serial.print("R");
     Serial.print(currentRotAngle);
-    Serial.print(" ");
+    Serial.print(" L");
     Serial.println(angleToLinear(currentLinAngle));
 }
 
