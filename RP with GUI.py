@@ -96,7 +96,15 @@ if __name__ == "__main__":
         mode='determinate',
         length=400
     )
+    pb1 = ttk.Progressbar(
+        master,
+        orient='horizontal',
+        mode='determinate',
+        length=400
+        )
     pb.pack()
+    pb1.pack()
+
 
     w1 = Scale(master, from_=-1.0, to=1.0, resolution=0.01)
     w1.set(0)
@@ -118,18 +126,28 @@ if __name__ == "__main__":
     index = 0
     maxLin = 1
     minLin = -1
+
+    minRot = -1
+    maxRot = 1
+
     pb['value'] = ((maxLin-lin) / (maxLin+ abs(minLin))) * 100
+    pb1['value'] = (((minRot-rot) / (maxRot + abs(minRot))) * 100) + 50
+
     pb.start()
 
     while True:
         master.update()
         pb['value'] = ((maxLin-lin) / (maxLin+ abs(minLin))) * 100
+        pb1['value'] = (((minRot-rot) / (maxRot + abs(minRot))) * 100) + 50
+
         pb.step()
+        pb1.step()
+
 
         if rotationControl:
-            calRot = (rot * 0.125) if (rot < 2.0) else 2.0
-            calLin = (rot * 0.125) if (rot < 2.0) else 2.0
-            send = "V R" + str(round(calRot, 3)) + " L" + str(round(calLin, 3)) + "\n"
+            # calRot = (rot * 0.05) if (rot < 2.0) else 2.0
+            calLin = (rot * 0.05) if (rot < 2.0) else 2.0
+            send = "V R" + str(0.0) + " L" + str(round(calLin, 3)) + "\n"
             print(send)
             serialHandler.write(send.encode())
             time.sleep(0.1)
@@ -148,6 +166,10 @@ if __name__ == "__main__":
                     L_part = re.sub("L", " ", L_part)
                     try:
                         rot = float(R_part)
+                        if rot > maxRot:
+                            maxRot = rot
+                        if rot < minRot:
+                            minRot = rot
                         lin = float(L_part)
                         if lin > maxLin:
                             maxLin = lin
