@@ -61,7 +61,7 @@ def initSerial():
     port = portsList[int(port)-1].split(" ")[0]
     print("chosen1: " + port)
 
-    ser1 = serial.Serial(port=port, baudrate=9600, timeout=.001)
+    ser1 = serial.Serial(port=port, baudrate=57600, timeout=.001)
     
     ser1.close()
     ser1.open()
