@@ -69,8 +69,8 @@ rotSin = 0
 def runSin():
     global linSin, rotSin
     time.sleep(0.1)
-    send = "V R" + str(round(math.sin(rotSin), 4)) + \
-        " L" + str(round(math.sin(linSin), 4)) + "\n"
+    send = "V R" + str(round(math.sin(rotSin)*0.5, 4)) + \
+        " L" + str(round(math.sin(linSin)*0.5, 4)) + "\n"
     print(send)
     serialHandler.write(send.encode())
     linSin = linSin + 0.1
@@ -113,28 +113,34 @@ if __name__ == "__main__":
 
 
     # continuously grabbing the data
+    lin = 0.01
+    rot = 0.01
     index = 0
-    maxLin = 1.0
+    maxLin = 1
+    minLin = -1
+    pb['value'] = ((maxLin-lin) / (maxLin+ abs(minLin))) * 100
+    pb.start()
 
     while True:
-        lin = 0.01
-
         master.update()
-        pb['value'] = ((lin + 0.001) / maxLin * 400)
+        pb['value'] = ((maxLin-lin) / (maxLin+ abs(minLin))) * 100
+        pb.step()
+
         if rotationControl:
-            calRot = (rot * 0.5) if (rot < 2.0) else 2.0
+            calRot = (rot * 0.125) if (rot < 2.0) else 2.0
             calLin = (rot * 0.125) if (rot < 2.0) else 2.0
-            send = "V R" + str(calRot) + " L" + str(calLin) + "\n"
+            send = "V R" + str(round(calRot, 3)) + " L" + str(round(calLin, 3)) + "\n"
             print(send)
             serialHandler.write(send.encode())
+            time.sleep(0.1)
+
         if enaleSine:
             runSin()
+            time.sleep(0.05)
         try:
             if serialHandler.in_waiting:
                 packet = serialHandler.readline()
                 output = packet.decode('utf').split(' ')
-                # output = packet.decode('ascii').split('\t')
-                # print(output)
                 if isOutputLegal(output):
                     R_part = output[1]
                     R_part = re.sub("R", " ", R_part)
@@ -145,12 +151,13 @@ if __name__ == "__main__":
                         lin = float(L_part)
                         if lin > maxLin:
                             maxLin = lin
+                        if lin < minLin:
+                            minLin = lin
                     except Exception as e:
                         continue
                     print(str(rot) + " " + str(lin))
                 else:
                     # print("unavailable in " + str(index))
                     continue
-                # time.sleep(3)
         except Exception as e:
             continue
