@@ -20,7 +20,7 @@ class SerialHandler:
         self.baud = baudrate
         self.timeout = timeout
 
-        self.linear_steps  = 0
+        self.linear_steps = 0
         self.angular_steps = 0
 
         self.display_all_ports()
@@ -29,18 +29,17 @@ class SerialHandler:
     def display_all_ports(self):
         for port in self.all_ports:
             self.port_list.append(str(port))
-            rospy.loginfo("\t\t" + str(self.all_ports.index(port)+1) + " " + str(port))
+            rospy.loginfo("\t\t" + str(self.all_ports.index(port) + 1) + " " + str(port))
 
     def select_ports(self):
         send_port_index = input(f"Select port for sending position:")
-        self.send_port = self.port_list[int(send_port_index)-1].split(" ")[0]
+        self.send_port = self.port_list[int(send_port_index) - 1].split(" ")[0]
 
-        receive_port_index = input(f"Select port for receiving force data:")
-        self.receive_port = self.port_list[int(receive_port_index)-1].split(" ")[0]
+        receive_port_index = input(f"Select port for receiving controller data:")
+        self.receive_port = self.port_list[int(receive_port_index) - 1].split(" ")[0]
 
     def establish_connection(self):
-
-        self.serialSender   = serial.Serial(port=self.send_port, baudrate=self.baud, timeout=self.timeout)
+        self.serialSender = serial.Serial(port=self.send_port, baudrate=self.baud, timeout=self.timeout)
         self.serialReceiver = serial.Serial(port=self.receive_port, baudrate=self.baud, timeout=self.timeout)
 
         self.serialSender.close()
@@ -51,16 +50,16 @@ class SerialHandler:
 
     def check_connection(self):
         if self.serialSender.isOpen():
-            rospy.loginfo("\t\t" +"Connection with sender port is open")
+            rospy.loginfo("\t\t" + "Connection with sender port is open")
         else:
-            rospy.loginfo("\t\t" +"Connection failed with sender port")
+            rospy.loginfo("\t\t" + "Connection failed with sender port")
 
         if self.serialReceiver.isOpen():
-            rospy.loginfo("\t\t" +"Connection with receiving port is open")
+            rospy.loginfo("\t\t" + "Connection with receiving port is open")
         else:
-            rospy.loginfo("\t\t" +"Connection failed with receiving port")
+            rospy.loginfo("\t\t" + "Connection failed with receiving port")
 
-        if self.serialSender.isOpen() and True: #self.serialReceiver.isOpen():
+        if self.serialSender.isOpen() and True:  # self.serialReceiver.isOpen():
             return True
         else:
             return False
@@ -69,9 +68,9 @@ class SerialHandler:
         if self.check_connection():
             self.serialSender.close()
             # self.serialReceiver.close()
-            rospy.loginfo("\t\t" +"Closing ports safely")
+            rospy.loginfo("\t\t" + "Closing ports safely")
         else:
-            rospy.loginfo("\t\t" +"Error occurred or ports are already closed")
+            rospy.loginfo("\t\t" + "Error occurred or ports are already closed")
 
     def send_data(self, volt_L, volt_R):
         data2send = f"V R{volt_L} L{volt_R}\r\n"
@@ -79,7 +78,6 @@ class SerialHandler:
         self.serialSender.write(data2send.encode())
 
     def receive_data(self):
-
         if self.serialReceiver.in_waiting:
             serial_stream = self.serialReceiver.readline()
             data = serial_stream.decode("ascii").split(' ')
@@ -92,9 +90,9 @@ class SerialHandler:
                 l_part = data[2]
                 l_part = re.sub("L", " ", l_part)
 
-                self.linear_steps  = float(l_part)
+                self.linear_steps = float(l_part)
                 self.angular_steps = float(r_part)
-                rospy.loginfo("\t\tReceived data : L: %f ,  A: %f ", self.linear_steps, self.angular_steps)
+                rospy.loginfo("\t\tReceived data : L:%f ,  R:%f ", self.linear_steps, self.angular_steps)
             else:
                 rospy.loginfo("\t\t" + "Received corrupted data")
         else:
@@ -109,13 +107,12 @@ class SerialHandler:
 
 class RosDataHandler:
     def __init__(self, linear_scale, angular_scale, pub_topic_name="Step_Generator", sub_topic_name="/ft_data"):
-
         rospy.init_node("communication_handler", anonymous=False)
         self.node_name = rospy.get_caller_id()
         self.pub_topic_name = pub_topic_name
         self.sub_topic_name = sub_topic_name
 
-        self.linear_scale, self.angular_scale  = np.ravel((linear_scale, angular_scale))
+        self.linear_scale, self.angular_scale = np.ravel((linear_scale, angular_scale))
         self.fx, self.fy, self.fz, self.tx, self.ty, self.tz = np.ravel((0, 0, 0, 0, 0, 0))
 
         self.pub_steps = rospy.Publisher(self.pub_topic_name, Vector3, queue_size=10)
@@ -137,20 +134,21 @@ class RosDataHandler:
         self.tz = ft_data.wrench.torque.z
 
     def set_step_scale2(self, linear_scale, angular_scale):
-        self.linear_scale  = linear_scale
+        self.linear_scale = linear_scale
         self.angular_scale = angular_scale
 
     def publish_step_commands(self, linear_steps, angular_steps):
         step_data = Vector3()
 
-        step_data.x = linear_steps  * self.linear_scale
+        step_data.x = linear_steps * self.linear_scale
         step_data.y = angular_steps * self.angular_scale
         step_data.z = 0
 
         self.pub_steps.publish(step_data)
 
     def get_latest_force_data(self):
-        return self.fy, self.ty
+        # return self.fy, self.ty
+        return self.fy, self.fz  # for significant change during testing
 
 
 if __name__ == '__main__':
@@ -160,9 +158,22 @@ if __name__ == '__main__':
         serial_handler.establish_connection()
         if serial_handler.check_connection():
             count = 0.0
+            stopFlag = int(input("\n*** TYPE '1': stop, '0': continue ***"))
+
             while not rospy.is_shutdown():
+
+                fy, ty = rosHandler.get_latest_force_data()
+                V_R = (-0.0017 * ty ** 2 + 0.3953 * ty - 1.7699) / 1.0
+                V_L = (-0.0017 * fy ** 2 + 0.3953 * fy - 1.7699) / 1.0
+
                 serial_handler.receive_data()
-                serial_handler.send_data(count, count)
+                # serial_handler.send_data(count, count)
+                if stopFlag:
+                    serial_handler.send_data(count, count)
+                    rospy.loginfo(f"Force Sensor: R: {V_R}, L: {V_L}")
+                else:
+                    serial_handler.send_data(V_R, V_L)
+                    rospy.loginfo(f"Force Sensor: R: {V_R}, L: {V_L}")
                 # serial_handler.serialSender.flush()
                 rospy.sleep(0.5)
 
