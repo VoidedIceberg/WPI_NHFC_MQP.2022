@@ -4,6 +4,7 @@
 #include <sstream>
 #include <GCodeParser.h>
 #include <loadCell.h>
+#include <SoftwareSerial.h>
 
 using namespace std;
 
@@ -71,11 +72,11 @@ float forceToRotVoltage(float force)
 }
 
 // Function handels incomming message on the serial port and sets the motors target accordingly
-void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
+void handelMessage(SoftwareSerial* serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
 {
-    if (serial.available() > 0)
+    if (serial->available() > 0)
     {
-        if (GCode.AddCharToLine(Serial.read()))
+        if (GCode.AddCharToLine(serial->read()))
         {
             GCode.ParseLine();
             // Code to process the line of G-Code here…
@@ -135,7 +136,7 @@ void handelMessage(USBSerial serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
             else if (GCode.HasWord('Z'))
             {
                 initLoadCell();
-                Serial.println(readLoadCell());
+                serial->println(readLoadCell());
             }
         }
     }

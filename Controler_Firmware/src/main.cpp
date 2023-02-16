@@ -3,6 +3,7 @@
 #include <main.h>
 #include <message_handler.h>
 #include <utils.h>
+#include <SoftwareSerial.h>
 
 BLDCMotor ROT_MOTOR = BLDCMotor(MOTOR_POLES, MOTOR_RESISTANCE);
 BLDCDriver3PWM ROT_DRIVER = BLDCDriver3PWM(PC0, PC1, PC2, PC13); // M1 Port
@@ -14,11 +15,15 @@ MagneticSensorI2C LIN_ENCODER = MagneticSensorI2C(AS5600_I2C);
 
 enum STATE state = IDLE;
 
+SoftwareSerial SENDSERIAL(SOFTWARE_SERIAL_RX_PIN, SOFTWARE_SERIAL_TX_PIN); // RX, TX
+
 void setup()
 {
   // put your setup code here, to run once:
 
-  Serial.begin(9600); // initialize serial communication on the CDC USB port
+  Serial.begin(57600); // initialize serial communication on the CDC USB port
+  SENDSERIAL.begin(57600);
+
   initI2C();
   initMotor(&ROT_MOTOR,1, &ROT_DRIVER, &ROT_ENCODER);
   initMotor(&LIN_MOTOR,0, &LIN_DRIVER, &LIN_ENCODER);
@@ -35,9 +40,9 @@ void loop()
     state = READING;
     break;
   case READING:
-    if (Serial.available() > 0)
+    if (SENDSERIAL.available() > 0)
     {
-      handelMessage(Serial, &ROT_MOTOR, &LIN_MOTOR);
+      handelMessage(&SENDSERIAL, &ROT_MOTOR, &LIN_MOTOR);
     }
     state = SENDING;
     break;
