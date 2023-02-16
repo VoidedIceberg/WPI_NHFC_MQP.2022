@@ -24,7 +24,7 @@ void setup()
   x = 0;
   y = 0;
   z = 0;
-  Serial.begin(57600);
+  Serial.begin(115200);
   Serial.println("HELLO I'M HERE");
   nh.initNode();
   nh.advertise(chatter);
@@ -38,3 +38,33 @@ void loop()
   nh.spinOnce();
   delay(1);
 }
+
+/*
+ * rosserial Subscriber Example
+ * Blinks an LED on callback
+*/
+
+// #include <ros.h>
+// #include <std_msgs/Empty.h>
+
+// ros::NodeHandle nh;
+
+// void messageCb( const std_msgs::Empty& msg){
+//     digitalWrite(9, HIGH); 
+// }
+ 
+// ros::Subscriber<std_msgs::Empty> sub("toggle_led", &messageCb );
+
+// void setup()
+// {
+//   pinMode(9, OUTPUT);
+//   nh.initNode();
+//   nh.subscribe(sub);
+// }
+
+// void loop()
+// {
+//   nh.spinOnce();
+//   digitalWrite(9, LOW);
+//   delay(1);
+// }
