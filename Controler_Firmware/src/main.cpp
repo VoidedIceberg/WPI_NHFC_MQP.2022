@@ -21,8 +21,8 @@ void setup()
 {
   // put your setup code here, to run once:
 
-  Serial.begin(57600); // initialize serial communication on the CDC USB port
-  SENDSERIAL.begin(57600);
+  Serial.begin(9600);          // initialize serial communication on the CDC USB port
+  SENDSERIAL.begin(9600);
 
   initI2C();
   initMotor(&ROT_MOTOR,1, &ROT_DRIVER, &ROT_ENCODER);

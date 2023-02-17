@@ -23,8 +23,7 @@ void sendMovement(MagneticSensorI2C ROT_ENCODER, MagneticSensorI2C LIN_ENCODER)
     float currentLinAngle = readLINencoder(LIN_ENCODER);
 
     // Send the movement to the PC host
-    Serial.print("M ");
-    Serial.print("R");
+    Serial.print("M R");
     Serial.print(currentRotAngle);
     Serial.print(" L");
     Serial.println(angleToLinear(currentLinAngle));
@@ -72,11 +71,11 @@ float forceToRotVoltage(float force)
 }
 
 // Function handels incomming message on the serial port and sets the motors target accordingly
-void handelMessage(SoftwareSerial* serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
+void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR)
 {
-    if (serial->available() > 0)
+    if (s->available() > 0)
     {
-        if (GCode.AddCharToLine(serial->read()))
+        if (GCode.AddCharToLine(s->read()))
         {
             GCode.ParseLine();
             // Code to process the line of G-Code here…
@@ -88,6 +87,7 @@ void handelMessage(SoftwareSerial* serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_
                 if (GCode.HasWord('R'))
                 {
                     R = (float)GCode.GetWordValue('R');
+                    s->println("IT GOT HERE");
                 }
                 if (GCode.HasWord('L'))
                 {
@@ -136,7 +136,7 @@ void handelMessage(SoftwareSerial* serial, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_
             else if (GCode.HasWord('Z'))
             {
                 initLoadCell();
-                serial->println(readLoadCell());
+                s->println(readLoadCell());
             }
         }
     }
