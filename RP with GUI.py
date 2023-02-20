@@ -84,15 +84,18 @@ def turnonSin():
 
 linSin = 0
 rotSin = 0
+lastTime = 0
+
 def runSin():
-    global linSin, rotSin
-    time.sleep(0.125)
-    send = "V R" + str(round(math.sin(rotSin)*0.5, 4)) + \
-        " L" + str(round(math.sin(linSin)*1.0, 4)) + "\n"
-    print(send)
-    serialSend.write(send.encode())
-    linSin = linSin + 0.1
-    rotSin = rotSin + 0.1
+    global linSin, rotSin, lastTime
+    if time.time() - lastTime > 0.125:
+        send = "V R" + str(round(math.sin(rotSin)*0.5, 4)) + \
+            " L" + str(round(math.sin(linSin)*1.0, 4)) + "\n"
+        print(send)
+        serialSend.write(send.encode())
+        linSin = linSin + 0.1
+        rotSin = rotSin + 0.1
+        lastTime = time.time()
 
 def rotControledLin():
     global rotationControl
