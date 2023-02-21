@@ -10,25 +10,43 @@ import math
 # global variables
 prevRot = None  # current rotation
 prevLin = None  # current linear
-serialHandler = None
+serialSend = None
+serialRecieve = None
+
 rotationControl = False
 
 def initSerial():
-    global serialHandler
+    global serialSend, serialRecieve
+
     ports = serial.tools.list_ports.comports()
     portsList = []
     for onePort in ports:
         portsList.append(str(onePort))
         print(str(ports.index(onePort)+1) + " " + str(onePort))
 
-    port = input("Select Port: ")
+    port = input("Serial Send Select Port: ")
     port = portsList[int(port)-1].split(" ")[0]
     print("chosen: " + port)
 
-    serialHandler = serial.Serial(port=port, baudrate=9600, timeout=.001)
-    serialHandler.close()
+    serialSend = serial.Serial(port=port, baudrate=9600, timeout=.001)
+    serialSend.close()
 
-    serialHandler.open()
+    serialSend.open()
+
+    ports = serial.tools.list_ports.comports()
+    portsList = []
+    for onePort in ports:
+        portsList.append(str(onePort))
+        print(str(ports.index(onePort)+1) + " " + str(onePort))
+
+    port = input("Serial Send Select Port: ")
+    port = portsList[int(port)-1].split(" ")[0]
+    print("chosen: " + port)
+
+    serialRecieve = serial.Serial(port=port, baudrate=9600, timeout=.001)
+    serialRecieve.close()
+
+    serialRecieve.open()
 
 def isOutputLegal(output):  # check if the output is legal
     if len(output) < 2:  # check if the output is completed
@@ -50,10 +68,10 @@ def isDataAvailable(rot, lin):  # check if the data is continous
 
 
 def show_values():
-    global serialHandler
-    send = "V R" + str(w1.get()) + " L" + str(w2.get()) + "\n"
+    global serialSend
+    send = "V R" + str(w1.get()) + " L" + str(w2.get()) + "\r\n"
     print(send)
-    serialHandler.write(send.encode())
+    serialSend.write(send.encode())
 
 enaleSine = False
 
@@ -66,15 +84,18 @@ def turnonSin():
 
 linSin = 0
 rotSin = 0
+lastTime = 0
+
 def runSin():
-    global linSin, rotSin
-    time.sleep(0.1)
-    send = "V R" + str(round(math.sin(rotSin)*0.5, 4)) + \
-        " L" + str(round(math.sin(linSin)*0.5, 4)) + "\n"
-    print(send)
-    serialHandler.write(send.encode())
-    linSin = linSin + 0.1
-    rotSin = rotSin + 0.1
+    global linSin, rotSin, lastTime
+    if time.time() - lastTime > 0.125:
+        send = "V R" + str(round(math.sin(rotSin)*0.5, 4)) + \
+            " L" + str(round(math.sin(linSin)*1.0, 4)) + "\n"
+        print(send)
+        serialSend.write(send.encode())
+        linSin = linSin + 0.1
+        rotSin = rotSin + 0.1
+        lastTime = time.time()
 
 def rotControledLin():
     global rotationControl
@@ -135,29 +156,30 @@ if __name__ == "__main__":
 
     pb.start()
 
+
     while True:
         master.update()
         pb['value'] = ((maxLin-lin) / (maxLin+ abs(minLin))) * 100
-        pb1['value'] = (((minRot-rot) / (maxRot + abs(minRot))) * 100) + 50
+        pb1['value'] = 50 - (((minRot-rot) / (maxRot + abs(minRot))) * 100)
 
         pb.step()
         pb1.step()
 
-
         if rotationControl:
             # calRot = (rot * 0.05) if (rot < 2.0) else 2.0
             calLin = (rot * 0.05) if (rot < 2.0) else 2.0
-            send = "V R" + str(0.0) + " L" + str(round(calLin, 3)) + "\n"
+            send = "V R" + str(0.0) + " L" + str(round(calLin, 3))
             print(send)
-            serialHandler.write(send.encode())
-            time.sleep(0.1)
+            serialSend.write(send.encode())
+            # time.sleep(0.1)
 
         if enaleSine:
             runSin()
-            time.sleep(0.05)
+            # time.sleep(0.05)
+    
         try:
-            if serialHandler.in_waiting:
-                packet = serialHandler.readline()
+            if serialRecieve.in_waiting:
+                packet = serialRecieve.readline()
                 output = packet.decode('utf').split(' ')
                 if isOutputLegal(output):
                     R_part = output[1]
@@ -179,7 +201,11 @@ if __name__ == "__main__":
                         continue
                     print(str(rot) + " " + str(lin))
                 else:
-                    # print("unavailable in " + str(index))
+                    print("unavailable in " + str(index))
                     continue
         except Exception as e:
+            print(e)
             continue
+        serialRecieve.flushInput()
+        serialRecieve.flushOutput()
+

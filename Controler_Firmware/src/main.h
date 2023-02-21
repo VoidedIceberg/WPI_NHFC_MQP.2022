@@ -3,6 +3,9 @@
 
 #include <SimpleFOC.h>
 
+#define SOFTWARE_SERIAL_RX_PIN PC5
+#define SOFTWARE_SERIAL_TX_PIN PC4
+
 #define LEDPIN PA7
 #define FEED_BUTTON_PIN PA0
 
