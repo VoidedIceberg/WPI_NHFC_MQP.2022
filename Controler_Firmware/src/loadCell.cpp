@@ -12,7 +12,6 @@ HX711 scale;
 void initLoadCell()
 {
     scale.begin(I2C_SDA_PIN, I2C_SCL_PIN);
-    scale.set_scale(2230);
 }
 
 void calibrateLinear(BLDCMotor *LIN_MOTOR)
@@ -38,9 +37,7 @@ void calibrateLinear(BLDCMotor *LIN_MOTOR)
 
 float readLoadCell()
 {
-    // Serial.println("Reading load cell");
+    Serial.println("Reading load cell");
     TCA9548A(7);
-    delay(10);
-    initLoadCell();
     return scale.read();
 }

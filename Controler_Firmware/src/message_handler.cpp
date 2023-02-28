@@ -114,11 +114,23 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
             }
             else if (GCode.HasWord('C'))
             {
-                // calibrateLinear(LIN_MOTOR);
-                while (true)
+                int R, L = 0;
+                if (GCode.HasWord('R'))
                 {
-                    Serial.println(readLoadCell());
-                    delay(100);
+                    R = (int)GCode.GetWordValue('R');
+                }
+                else if (GCode.HasWord('L'))
+                {
+                    L = (int)GCode.GetWordValue('L');
+                }
+
+                if (R == 1)
+                {
+                    ;
+                }
+                else if (L == 1)
+                {
+                    calibrateLinear(LIN_MOTOR);
                 }
             }
             else if (GCode.HasWord('Z'))
