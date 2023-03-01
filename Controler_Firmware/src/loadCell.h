@@ -3,7 +3,7 @@
 
 #include <SimpleFOC.h>
 
-float readLoadCell();
+float readLoadCell(int ch);
 void calibrateLinear(BLDCMotor *LIN_MOTOR); 
 void initLoadCell();
 

@@ -1,4 +1,5 @@
 #include <message_handler.h>
+#include <main.h>
 #include <SimpleFOC.h>
 #include <utils.h>
 #include <sstream>
@@ -114,29 +115,20 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
             }
             else if (GCode.HasWord('C'))
             {
-                int R, L = 0;
-                if (GCode.HasWord('R'))
+                // initI2C();
+                while (true)
                 {
-                    R = (int)GCode.GetWordValue('R');
-                }
-                else if (GCode.HasWord('L'))
-                {
-                    L = (int)GCode.GetWordValue('L');
-                }
+                    float LC1 = readLoadCell(7);
+                    float LC2 = readLoadCell(2);
 
-                if (R == 1)
-                {
-                    ;
-                }
-                else if (L == 1)
-                {
-                    calibrateLinear(LIN_MOTOR);
+                    Serial.print(LC1);
+                    Serial.print(" ");
+                    Serial.println(LC2);
                 }
             }
             else if (GCode.HasWord('Z'))
             {
-                initLoadCell();
-                s->println(readLoadCell());
+                s->println(readLoadCell(2));
             }
         }
     }
