@@ -16,23 +16,36 @@ void initLoadCell()
 
 void calibrateLinear(BLDCMotor *LIN_MOTOR)
 {
-    // Serial.println("Calibrating linear axis");
-    // TCA9548A(7);
-    // initLoadCell();
-    // Serial.println("The load cell currently reads:" + String(readLoadCell(2)));
+    Serial.println("Calibrating Linear axis");
 
-    // float testVoltage = 0.0;
-    // while (testVoltage <= 2.0)
-    // {
-    //     TCA9548A(0);
-    //     LIN_MOTOR->target = testVoltage;
-    //     LIN_MOTOR->loopFOC();
-    //     LIN_MOTOR->move();
+    float testVoltage = 0.0;
+    while (testVoltage <= 1.5)
+    {
+        TCA9548A(0);
+        LIN_MOTOR->target = testVoltage;
+        LIN_MOTOR->loopFOC();
+        LIN_MOTOR->move();
 
-    //     TCA9548A(7);
-    //     Serial.println(String(testVoltage) + " " + String(readLoadCell(2)));
-    //     testVoltage += 0.01;
-    // }
+        Serial.println(String(testVoltage) + " " + String(readLoadCell(2)));
+        testVoltage += 0.01;
+    }
+}
+
+void calibrateRot(BLDCMotor *ROT_MOTOR)
+{
+    Serial.println("Calibrating rotational axis");
+
+    float testVoltage = 0.0;
+    while (testVoltage <= 1.5)
+    {
+        TCA9548A(1);
+        ROT_MOTOR->target = testVoltage;
+        ROT_MOTOR->loopFOC();
+        ROT_MOTOR->move();
+
+        Serial.println(String(testVoltage) + " " + String(readLoadCell(7)));
+        testVoltage += 0.01;
+    }
 }
 
 float readLoadCell(int ch)
@@ -53,7 +66,7 @@ float readLoadCell(int ch)
         s.set_scale(10604.1875);
     }
 
-    float reading = s.get_units(5);
+    float reading = s.get_units(10);
     Wire.begin();
     return reading;
 }

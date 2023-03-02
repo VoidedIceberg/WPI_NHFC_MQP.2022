@@ -4,7 +4,8 @@
 #include <SimpleFOC.h>
 
 float readLoadCell(int ch);
-void calibrateLinear(BLDCMotor *LIN_MOTOR); 
+void calibrateLinear(BLDCMotor *LIN_MOTOR);
+void calibrateRot(BLDCMotor *ROT_MOTOR);
 void initLoadCell();
 
 #endif // LoadCell_H_
