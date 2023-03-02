@@ -58,11 +58,14 @@ float forceToLinVoltage(float force)
 float forceToRotVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    // y = 0.0002x2 + 0.0116x R² = 0.9989
-    float voltage = 0.017 * force; // needs a conversion factor to even make since
-
-    if (voltage >= 0.0 || voltage < 1.2)
+    // y - 0.0004x^2 + 0.0127x
+    float voltage = ((0.0004 * (abs(force) * abs(force))) + (0.0127 * abs(force)));
+    if (voltage < 1.5)
     {
+        if (force < 0)
+        {
+            voltage = -voltage;
+        }
         return voltage;
     }
     else
@@ -132,7 +135,7 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                         Serial.print(controlForce);
                         Serial.print(" ");
                         Serial.print(forceToRotVoltage(controlForce));
-                        ROT_MOTOR->target = (forceToRotVoltage(controlForce)-0.1);
+                        ROT_MOTOR->target = (forceToRotVoltage(controlForce));
                         for (int i = 0; i < 1000; i++)
                         {
                             TCA9548A(1);

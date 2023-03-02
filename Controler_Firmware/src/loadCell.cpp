@@ -57,13 +57,15 @@ float readLoadCell(int ch)
     s.wait_ready();
     if (ch == 2)
     {
-        // cal factor = 81582 / 16.0 = 5098.625
-        s.set_scale(5098.625);
+        // cal factor = 15024.00 / 21.0 = 
+        s.set_scale(715.20);
+        s.set_offset(69285);
     }
     if (ch == 7)
     {
-        // cal factor = 169857.00 / 16.0 = 10604.1875
-        s.set_scale(10604.1875);
+        // cal factor = 262588.00 / 19.0 = 13800.00
+        s.set_scale(13800.0);
+        s.set_offset(-18661);
     }
 
     float reading = s.get_units(10);
