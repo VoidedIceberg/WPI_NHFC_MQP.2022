@@ -41,9 +41,14 @@ float angleToLinear(float angle)
 float forceToLinVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (-0.0017 * (force * force) + 0.3953 * force - 1.7699) / 1.0; // needs a conversion factor to even make since
-    if (voltage >= 0.0 || voltage < 1.2)
+    float voltage = (0.0034413 * force) + 0.2694494;
+
+    if (voltage < 1.5)
     {
+        if (force < 0)
+        {
+            voltage = -voltage;
+        }
         return voltage;
     }
     else
@@ -117,17 +122,17 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                 ROT_MOTOR->target = (abs(R) < 2.1) ? R : 0.0;
                 LIN_MOTOR->target = (abs(L) < 2.1) ? L : 0.0;
             }
-            else if (GCode.HasWord('C'))
+            else if (GCode.HasWord('C')) // calibration mode!
             {
-                if (GCode.HasWord('L'))
+                if (GCode.HasWord('L')) // calibrate linear motor
                 {
                     calibrateLinear(LIN_MOTOR);
                 }
-                else if (GCode.HasWord('R'))
+                else if (GCode.HasWord('R')) // calibrate Rotational motor
                 {
                     calibrateRot(ROT_MOTOR);
                 }
-                else if (GCode.HasWord('G'))
+                else if (GCode.HasWord('G')) // 
                 {
                     while (true)
                     {
@@ -148,7 +153,23 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                         Serial.println(measuredForce);
                     }
                 }
-                else{
+                else if (GCode.HasWord('H'))
+                {
+                    for (float i = 0.0; i < 40; i += 0.1)
+                    {
+                        ROT_MOTOR->target = (forceToRotVoltage(i));
+                        Serial.print(i);
+                        for (int j = 0; j < 1000; j++)
+                        {
+                            TCA9548A(1);
+                            ROT_MOTOR->loopFOC();
+                            ROT_MOTOR->move();
+                        }
+                        Serial.print(" ");
+                        Serial.println(readLoadCell(7));
+                    }
+                }
+                    else{
                     // initI2C();
                     while (true)
                     {

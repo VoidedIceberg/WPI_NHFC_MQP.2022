@@ -22,7 +22,7 @@ void calibrateLinear(BLDCMotor *LIN_MOTOR)
     while (testVoltage <= 1.5)
     {
         TCA9548A(0);
-        LIN_MOTOR->target = testVoltage;
+        LIN_MOTOR->target = -testVoltage;
         LIN_MOTOR->loopFOC();
         LIN_MOTOR->move();
 
