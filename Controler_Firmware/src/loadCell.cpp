@@ -23,8 +23,11 @@ void calibrateLinear(BLDCMotor *LIN_MOTOR)
     {
         TCA9548A(0);
         LIN_MOTOR->target = -testVoltage;
-        LIN_MOTOR->loopFOC();
-        LIN_MOTOR->move();
+        for (int i = 0; i < 1000; i++)
+        {
+            LIN_MOTOR->loopFOC();
+            LIN_MOTOR->move();
+        }
 
         Serial.println(String(testVoltage) + " " + String(readLoadCell(2)));
         testVoltage += 0.01;

@@ -41,8 +41,8 @@ float angleToLinear(float angle)
 float forceToLinVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (0.0034413 * force) + 0.2694494;
-
+    float voltage = (0.0034413 * abs(force)) + 0.2045; // This should work this time 4:32 pm 3/3/23
+    // float voltage = (0.0031 * abs(force)) + 0.20;
     if (voltage < 1.5)
     {
         if (force < 0)
@@ -153,7 +153,7 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                         Serial.println(measuredForce);
                     }
                 }
-                else if (GCode.HasWord('H'))
+                else if (GCode.HasWord('H')) // validate roatational
                 {
                     for (float i = 0.0; i < 40; i += 0.1)
                     {
@@ -167,6 +167,28 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                         }
                         Serial.print(" ");
                         Serial.println(readLoadCell(7));
+                    }
+                }
+                else if (GCode.HasWord('I')) // validate Linear
+                {
+                    Serial.println("Starting Linear Calibration");
+                    Serial.println(readLoadCell(2));
+                    for (float i = 0.0; i < 153.0; i += 1.0)
+                    {
+                        TCA9548A(0);
+                        LIN_MOTOR->target = (-1*forceToLinVoltage(i));
+                        Serial.print(i);
+                        Serial.print(" ");
+                        Serial.print(forceToLinVoltage(i));
+                        Serial.print(" ");
+                        for (int j = 0; j < 1000; j++)
+                        {
+                            TCA9548A(0);
+                            LIN_MOTOR->loopFOC();
+                            LIN_MOTOR->move();
+                        }
+                        Serial.print(" ");
+                        Serial.println(readLoadCell(2));
                     }
                 }
                     else{
