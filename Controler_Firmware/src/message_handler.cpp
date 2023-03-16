@@ -1,4 +1,5 @@
 #include <message_handler.h>
+#include <main.h>
 #include <SimpleFOC.h>
 #include <utils.h>
 #include <sstream>
@@ -40,9 +41,14 @@ float angleToLinear(float angle)
 float forceToLinVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (-0.0017 * (force * force) + 0.3953 * force - 1.7699) / 1.0; // needs a conversion factor to even make since
-    if (voltage >= 0.0 || voltage < 1.2)
+    float voltage = (0.0034413 * force) + 0.2694494;
+
+    if (voltage < 1.5)
     {
+        if (force < 0)
+        {
+            voltage = -voltage;
+        }
         return voltage;
     }
     else
@@ -57,9 +63,14 @@ float forceToLinVoltage(float force)
 float forceToRotVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (-0.0017 * (force * force) + 0.3953 * force - 1.7699) / 1.0; // needs a conversion factor to even make since
-    if (voltage >= 0.0 || voltage < 1.2)
+    // y - 0.0004x^2 + 0.0127x
+    float voltage = ((0.0004 * (abs(force) * abs(force))) + (0.0127 * abs(force)));
+    if (voltage < 1.5)
     {
+        if (force < 0)
+        {
+            voltage = -voltage;
+        }
         return voltage;
     }
     else
@@ -87,7 +98,6 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                 if (GCode.HasWord('R'))
                 {
                     R = (float)GCode.GetWordValue('R');
-                    s->println("IT GOT HERE");
                 }
                 if (GCode.HasWord('L'))
                 {
@@ -112,31 +122,69 @@ void handelMessage(SoftwareSerial* s, BLDCMotor *ROT_MOTOR, BLDCMotor *LIN_MOTOR
                 ROT_MOTOR->target = (abs(R) < 2.1) ? R : 0.0;
                 LIN_MOTOR->target = (abs(L) < 2.1) ? L : 0.0;
             }
-            else if (GCode.HasWord('C'))
+            else if (GCode.HasWord('C')) // calibration mode!
             {
-                int R, L = 0;
-                if (GCode.HasWord('R'))
-                {
-                    R = (int)GCode.GetWordValue('R');
-                }
-                else if (GCode.HasWord('L'))
-                {
-                    L = (int)GCode.GetWordValue('L');
-                }
-
-                if (R == 1)
-                {
-                    ;
-                }
-                else if (L == 1)
+                if (GCode.HasWord('L')) // calibrate linear motor
                 {
                     calibrateLinear(LIN_MOTOR);
+                }
+                else if (GCode.HasWord('R')) // calibrate Rotational motor
+                {
+                    calibrateRot(ROT_MOTOR);
+                }
+                else if (GCode.HasWord('G')) // 
+                {
+                    while (true)
+                    {
+                        float controlForce = readLoadCell(2);
+                        Serial.print(controlForce);
+                        Serial.print(" ");
+                        Serial.print(forceToRotVoltage(controlForce));
+                        ROT_MOTOR->target = (forceToRotVoltage(controlForce));
+                        for (int i = 0; i < 1000; i++)
+                        {
+                            TCA9548A(1);
+                            ROT_MOTOR->loopFOC();
+                            ROT_MOTOR->move();
+                        }
+                        float measuredForce = readLoadCell(7);
+
+                        Serial.print(" ");
+                        Serial.println(measuredForce);
+                    }
+                }
+                else if (GCode.HasWord('H'))
+                {
+                    for (float i = 0.0; i < 40; i += 0.1)
+                    {
+                        ROT_MOTOR->target = (forceToRotVoltage(i));
+                        Serial.print(i);
+                        for (int j = 0; j < 1000; j++)
+                        {
+                            TCA9548A(1);
+                            ROT_MOTOR->loopFOC();
+                            ROT_MOTOR->move();
+                        }
+                        Serial.print(" ");
+                        Serial.println(readLoadCell(7));
+                    }
+                }
+                    else{
+                    // initI2C();
+                    while (true)
+                    {
+                        float LC1 = readLoadCell(7);
+                        float LC2 = readLoadCell(2);
+
+                        Serial.print(LC1);
+                        Serial.print(" ");
+                        Serial.println(LC2);
+                    }
                 }
             }
             else if (GCode.HasWord('Z'))
             {
-                initLoadCell();
-                s->println(readLoadCell());
+                s->println(readLoadCell(2));
             }
         }
     }
