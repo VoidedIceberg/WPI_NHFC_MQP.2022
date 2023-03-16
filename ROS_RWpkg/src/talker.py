@@ -8,6 +8,21 @@ import serial, serial.tools.list_ports
 from geometry_msgs.msg import Vector3
 from geometry_msgs.msg import WrenchStamped
 
+# for the graph
+import matplotlib.pyplot as plt
+import csv
+
+# field names
+fields = ['Linear Force from Force Sensor', 'Rotation Force from Force Sensor', 'Linear Force from Controller', 'Rotation Force from Controller']
+
+# data rows of csv file
+rows = []
+
+# init the dataset for graphing
+ftL_data = []
+ftR_data = []
+ctrlL_data = []
+ctrlR_data = []
 
 class SerialHandler:
     def __init__(self, send_port=None, receive_port=None, baudrate=None, timeout=0.0001):
@@ -93,7 +108,12 @@ class SerialHandler:
 
                 self.linear_steps = float(l_part)
                 self.angular_steps = float(r_part)
-                rospy.loginfo("\t\tReceived data : L: %f ,  A: %f ", self.linear_steps, self.angular_steps)
+
+                # for the graph of ft data
+                ctrlL_data.append(self.linear_steps)
+                ctrlR_data.append(self.angular_steps)
+
+                rospy.loginfo("\t\tReceived data : L: %f ,  R: %f ", self.linear_steps, self.angular_steps)
             else:
                 rospy.loginfo("\t\t" + "Received corrupted data")
         else:
@@ -147,8 +167,9 @@ class RosDataHandler:
         self.pub_steps.publish(step_data)
 
     def get_latest_force_data(self):
+        ftL_data.append(self.fy)
+        ftR_data.append(self.fy)
         return self.fy, self.ty
-
 
 if __name__ == '__main__':
     try:
@@ -160,20 +181,41 @@ if __name__ == '__main__':
         if serial_handler.check_connection():
             count = 0.0
             while not rospy.is_shutdown():
-                fx, ty = rosHandler.get_latest_force_data()
+                fy, ty = rosHandler.get_latest_force_data()
 
-                V_L = np.round((0.0017 * fx ** 2 + 0.3953 * fx - 1.7699) / 1.0, 4)
-                V_R = np.round((0.0017 * ty ** 2 + 0.3953 * ty - 1.7699) / 1.0, 4)
+                # V_L = np.round((0.0017 * fy ** 2 + 0.3953 * fy - 1.7699) / 1.0, 4)
+                # V_R = np.round((0.0017 * ty ** 2 + 0.3953 * ty - 1.7699) / 1.0, 4)
+                V_L = np.round((0.0034413 * abs(fy)) + 0.2045, 4)
+                if V_L < 1.5:
+                    if fy < 0:
+                        V_L = -V_L
+                V_R = np.round((0.0004 * (abs(ty) * abs(ty))) + (0.0127 * abs(ty)), 4)
+                if V_R < 1.5:
+                    if ty < 0:
+                        V_R = -V_R
 
                 serial_handler.receive_data()
-                serial_handler.send_data(np.round(fx * 2), np.round(ty * 2))
+                serial_handler.send_data(V_R, V_L)
                 rosHandler.rate.sleep()
-
 
     except Exception as e:
         err = "Exception occurred : " + str(e)
         rospy.loginfo(err)
 
     finally:
+        # name of csv file
+        filename = "data_records.csv"
+
+        # writing to csv file
+        with open(filename, 'w') as csvfile:
+            # creating a csv writer object
+            csvwriter = csv.writer(csvfile)
+
+            # writing the fields
+            csvwriter.writerow(fields)
+
+            # writing the data rows
+            csvwriter.writerows(rows)
+
         serial_handler.send_data(0, 0)
         serial_handler.close_all_ports()
