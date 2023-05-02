@@ -41,8 +41,8 @@ float angleToLinear(float angle)
 float forceToLinVoltage(float force)
 {
     // this equation was taken from the leaver arm and assumes the force in grams
-    float voltage = (0.0034413 * abs(force)) + 0.2045; // This should work this time 4:32 pm 3/3/23
-    // float voltage = (0.0031 * abs(force)) + 0.20;
+    float voltage = (0.0035382 * abs(force)) + 0.2012702; // This should work this time 4:32 pm 3/3/23
+
     if (voltage < 1.5)
     {
         if (force < 0)
